@@ -14,7 +14,7 @@
             height: 100vh;
             margin: 0;
             background-color: #ffebcd;
-            overflow: hidden;
+            overflow: hidden; /* Prevent body scrolling */
         }
         .game-container {
             position: relative;
@@ -24,6 +24,7 @@
             border-radius: 20px;
             padding: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            touch-action: none; /* Disable default touch actions for the game area */
         }
         .tile {
             position: absolute;
@@ -38,6 +39,14 @@
             font-weight: bold;
             color: #776e65;
             transition: transform 0.2s;
+            cursor: default; /* Default cursor for non-modification mode */
+        }
+        .tile.clickable { /* Cursor for modification mode */
+            cursor: pointer;
+        }
+        .tile.selected {
+            border: 4px solid #4CAF50; /* Highlight selected tile */
+            box-sizing: border-box; /* Ensure border doesn't push tile out */
         }
         .tile[data-value="2"] { background-color: #ffebcd; }
         .tile[data-value="4"] { background-color: #ffdead; }
@@ -47,9 +56,87 @@
         .tile[data-value="64"] { background-color: #db7093; color: #f9f6f2; }
         .tile[data-value="128"] { background-color: #ff6347; color: #f9f6f2; }
         .tile[data-value="256"] { background-color: #ff4500; color: #f9f6f2; }
-        .tile[data-value="512"] { background-color: #ff8c00; color: #f9f6f2; }
-        .tile[data-value="1024"] { background-color: #ffd700; color: #f9f6f2; }
-        .tile[data-value="2048"] { background-color: #ffff00; color: #f9f6f2; }
+        .tile[data-value="512"] { background-color: #ff8c00; color: #f9f9e2; } /* Adjusted color for better contrast */
+        .tile[data-value="1024"] { background-color: #ffd700; color: #f9f9e2; } /* Adjusted color for better contrast */
+        .tile[data-value="2048"] { background-color: #ffff00; color: #f9f9e2; } /* Adjusted color for better contrast */
+
+        /* Popup/Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            color: #776e65;
+        }
+        .modal-content button {
+            margin: 10px;
+            padding: 12px 25px;
+            border: none;
+            background-color: #ffcc99;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #776e65;
+            transition: background-color 0.2s;
+        }
+        .modal-content button:hover {
+            background-color: #ffb66a;
+        }
+        .load-game-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .load-game-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .load-game-item:last-child {
+            border-bottom: none;
+        }
+        .load-game-item span {
+            font-size: 1.1em;
+            color: #555;
+            flex-grow: 1;
+            text-align: left;
+        }
+        .load-game-item .item-buttons button {
+            margin: 0 5px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            background-color: #a4ddff; /* Load button color */
+        }
+        .load-game-item .item-buttons .delete-btn {
+            background-color: #ff8c8c; /* Delete button color */
+            color: white;
+        }
+        .load-game-item .item-buttons button:hover {
+            opacity: 0.8;
+        }
+
         .popup {
             position: fixed;
             top: 50%;
@@ -61,6 +148,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             text-align: center;
             display: none;
+            z-index: 1100; /* Ensure popup is on top of modals */
         }
         .popup button {
             margin-top: 10px;
@@ -75,6 +163,7 @@
             display: flex;
             justify-content: space-between;
             width: 90vmin;
+            gap: 10px; /* Space between buttons */
         }
         .controls button {
             padding: 10px;
@@ -82,38 +171,127 @@
             background-color: #ffcc99;
             border-radius: 5px;
             cursor: pointer;
+            flex-grow: 1; /* Allow buttons to grow */
+            font-size: 1em;
+        }
+        .max-tile-container { /* 新增容器，包含最大数字显示和隐藏切换按钮 */
+            display: flex;
+            align-items: center;
+            gap: 5px; /* 间距 */
+            flex-grow: 1;
+            justify-content: flex-end; /* 靠右对齐 */
         }
         .max-tile {
             font-size: 1.5em;
             font-weight: bold;
+            color: #776e65;
+        }
+        .toggle-visibility-btn { /* 隐藏/显示修改按钮的切换按钮样式 */
+            padding: 8px 10px; /* 稍微小一点 */
+            font-size: 0.8em;
+            background-color: #cccccc; /* 灰色 */
+            color: #444;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .toggle-visibility-btn:hover {
+            background-color: #aaaaaa;
+        }
+
+        /* 隐藏修改按钮的容器 */
+        .modify-button-wrapper.hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
+    <div class="modal-overlay" id="start-screen">
+        <div class="modal-content">
+            <h2>欢迎来到 2048!</h2>
+            <button onclick="startNewGame()">新游戏</button>
+            <button onclick="showLoadGameList(false)">加载存档</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="load-game-screen" style="display: none;">
+        <div class="modal-content">
+            <h2>选择存档</h2>
+            <ul class="load-game-list" id="saved-games-list">
+                </ul>
+            <button onclick="hideLoadGameList()">返回</button>
+        </div>
+    </div>
+
     <div class="game-container" id="game-container"></div>
     <div class="controls">
         <button onclick="restartGame()">重置</button>
-        <div class="max-tile" id="max-tile">最大数字: 0</div>
+        <button onclick="saveGame()">存档</button>
+        <button onclick="showLoadGameList(true)">加载存档</button>
+        <div class="modify-button-wrapper" id="modify-button-wrapper">
+            <button id="toggle-modify-btn" onclick="toggleModificationMode()">开启修改</button>
+        </div>
+        <div class="max-tile-container"> <div class="max-tile" id="max-tile">最大数字: 0</div>
+            <button class="toggle-visibility-btn" onclick="toggleModifyButtonVisibility()">👁️</button> </div>
     </div>
     <div class="popup" id="popup">
         <p id="popup-message"></p>
         <button onclick="closePopup()">确定</button>
     </div>
+
     <script>
         const gameContainer = document.getElementById('game-container');
         const popup = document.getElementById('popup');
         const popupMessage = document.getElementById('popup-message');
         const maxTileDisplay = document.getElementById('max-tile');
+        const startScreen = document.getElementById('start-screen');
+        const loadGameScreen = document.getElementById('load-game-screen');
+        const savedGamesList = document.getElementById('saved-games-list');
+        const toggleModifyBtn = document.getElementById('toggle-modify-btn'); // 获取修改模式按钮
+        const modifyButtonWrapper = document.getElementById('modify-button-wrapper'); // 获取修改模式按钮的父容器
+
         const size = 4;
         let board = Array(size).fill().map(() => Array(size).fill(0));
         let maxTile = 0;
+        let selectedTile = null; // To store the coordinates of the selected tile {x, y}
+        let isModificationMode = false; // 修改方块数字功能的状态，默认为关闭
 
+        const localStorageKey = '2048_game_saves';
+        const modifyButtonVisibilityKey = '2048_modify_btn_hidden'; // 新增 localStorage key
+        let isModifyButtonHidden = localStorage.getItem(modifyButtonVisibilityKey) === 'true'; // 默认从 localStorage 读取隐藏状态
+
+        const swipeThreshold = 20; // Minimum pixels to count as a swipe
+        let startX, startY; // For swipe detection
+
+        // --- Game Core Functions ---
         function createTile(value, x, y) {
             const tile = document.createElement('div');
             tile.classList.add('tile');
+            if (isModificationMode) {
+                tile.classList.add('clickable'); // Add clickable class if mode is on
+            }
             tile.dataset.value = value;
             tile.style.transform = `translate(${x * 22.5}vmin, ${y * 22.5}vmin)`;
             tile.textContent = value;
+            tile.dataset.x = x; // Store x coordinate
+            tile.dataset.y = y; // Store y coordinate
+
+            // Add click event listener to tiles for modification
+            tile.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent gameContainer's mousedown/touchstart from triggering
+                if (isModificationMode) { // 只有在修改模式开启时才响应点击
+                    if (selectedTile && selectedTile.x === x && selectedTile.y === y) {
+                        // Deselect if the same tile is clicked again
+                        selectedTile = null;
+                    } else {
+                        selectedTile = { x, y };
+                    }
+                    updateBoard(); // Re-render to apply/remove 'selected' class
+                    if (selectedTile) {
+                        promptForTileValue(x, y);
+                    }
+                }
+            });
             gameContainer.appendChild(tile);
         }
 
@@ -122,11 +300,63 @@
             for (let y = 0; y < size; y++) {
                 for (let x = 0; x < size; x++) {
                     if (board[y][x] !== 0) {
-                        createTile(board[y][x], x, y);
+                        const tile = document.createElement('div');
+                        tile.classList.add('tile');
+                        if (isModificationMode) {
+                            tile.classList.add('clickable'); // Ensure tiles are clickable in mod mode
+                        }
+                        tile.dataset.value = board[y][x];
+                        tile.style.transform = `translate(${x * 22.5}vmin, ${y * 22.5}vmin)`;
+                        tile.textContent = board[y][x];
+                        tile.dataset.x = x;
+                        tile.dataset.y = y;
+
+                        if (selectedTile && selectedTile.x === x && selectedTile.y === y) {
+                            tile.classList.add('selected');
+                        }
+
+                        tile.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                            if (isModificationMode) { // 只有在修改模式开启时才响应点击
+                                if (selectedTile && selectedTile.x === x && selectedTile.y === y) {
+                                    selectedTile = null;
+                                } else {
+                                    selectedTile = { x, y };
+                                }
+                                updateBoard();
+                                if (selectedTile) {
+                                    promptForTileValue(x, y);
+                                }
+                            }
+                        });
+                        gameContainer.appendChild(tile);
                     }
                 }
             }
             maxTileDisplay.textContent = `最大数字: ${maxTile}`;
+        }
+
+        function promptForTileValue(x, y) {
+            let newValue = prompt(`请输入位置 (${x}, ${y}) 的新数字 (当前: ${board[y][x]})。必须是2的幂次:`);
+            if (newValue !== null) { // If user didn't cancel
+                newValue = parseInt(newValue);
+                // Check if it's a positive integer and a power of 2
+                if (!isNaN(newValue) && newValue > 0 && (newValue & (newValue - 1)) === 0) {
+                    board[y][x] = newValue;
+                    if (newValue > maxTile) {
+                        maxTile = newValue;
+                    }
+                    selectedTile = null; // Deselect after modification
+                    updateBoard();
+                } else {
+                    alert("请输入一个正整数且为2的幂次 (例如 2, 4, 8, 16...).");
+                    selectedTile = null; // Deselect on invalid input
+                    updateBoard();
+                }
+            } else {
+                selectedTile = null; // Deselect if prompt is cancelled
+                updateBoard();
+            }
         }
 
         function addRandomTile() {
@@ -144,8 +374,38 @@
                 board[y][x] = value;
                 updateBoard();
             } else {
-                showPopup(`游戏结束，最大数字为 ${maxTile}`);
+                // Check if game is truly over (no more moves)
+                if (!canMove()) {
+                    showPopup(`游戏结束，最大数字为 ${maxTile}`);
+                }
             }
+        }
+
+        function canMove() {
+            // Check for empty tiles
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    if (board[y][x] === 0) {
+                        return true;
+                    }
+                }
+            }
+
+            // Check for adjacent equal tiles (horizontal and vertical)
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const currentValue = board[y][x];
+                    // Check right
+                    if (x < size - 1 && currentValue === board[y][x + 1]) {
+                        return true;
+                    }
+                    // Check down
+                    if (y < size - 1 && currentValue === board[y + 1][x]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         function slide(row) {
@@ -158,7 +418,7 @@
 
         function combine(row) {
             for (let i = size - 1; i >= 1; i--) {
-                if (row[i] === row[i - 1]) {
+                if (row[i] === row[i - 1] && row[i] !== 0) { // Ensure non-zero tiles combine
                     row[i] *= 2;
                     row[i - 1] = 0;
                     if (row[i] > maxTile) {
@@ -170,7 +430,18 @@
         }
 
         function move(direction) {
+            // If any modal is open, don't allow game moves
+            if (startScreen.style.display !== 'none' || loadGameScreen.style.display !== 'none' || popup.style.display !== 'none') {
+                return;
+            }
+            // Also, don't allow moves if in modification mode, to avoid conflicts
+            if (isModificationMode) {
+                return;
+            }
+
             let moved = false;
+            let originalBoard = JSON.parse(JSON.stringify(board)); // Deep copy to check for changes
+
             for (let i = 0; i < size; i++) {
                 let row;
                 if (direction === 'right' || direction === 'left') {
@@ -181,7 +452,6 @@
                     if (direction === 'up') row.reverse();
                 }
 
-                const originalRow = [...row];
                 row = slide(row);
                 row = combine(row);
                 row = slide(row);
@@ -196,76 +466,108 @@
                         board[j][i] = row[j];
                     }
                 }
-
-                if (JSON.stringify(originalRow) !== JSON.stringify(row)) {
-                    moved = true;
-                }
             }
+
+            // Check if the board has actually changed
+            if (JSON.stringify(originalBoard) !== JSON.stringify(board)) {
+                moved = true;
+            }
+
             if (moved) {
                 addRandomTile();
+            } else if (!canMove()) {
+                showPopup(`游戏结束，最大数字为 ${maxTile}`);
             }
         }
 
+        // --- Input Handling (Optimized for Mobile) ---
         function setupInput() {
-            let startX, startY;
             gameContainer.addEventListener('mousedown', (e) => {
-                startX = e.clientX;
-                startY = e.clientY;
+                // Only start swipe if not clicking on a tile for modification
+                if (!e.target.classList.contains('tile') || !isModificationMode) { // Check if not clicking a tile OR if not in modification mode
+                    startX = e.clientX;
+                    startY = e.clientY;
+                }
             });
 
             gameContainer.addEventListener('mouseup', (e) => {
-                const endX = e.clientX;
-                const endY = e.clientY;
-                const dx = endX - startX;
-                const dy = endY - startY;
+                // Only process swipe if not in modification mode
+                if (startX !== undefined && !isModificationMode) {
+                    const endX = e.clientX;
+                    const endY = e.clientY;
+                    const dx = endX - startX;
+                    const dy = endY - startY;
 
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 0) {
-                        move('right');
-                    } else {
-                        move('left');
+                    if (Math.abs(dx) > swipeThreshold || Math.abs(dy) > swipeThreshold) { // Only trigger if a significant swipe occurred
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            if (dx > 0) {
+                                move('right');
+                            } else {
+                                move('left');
+                            }
+                        } else {
+                            if (dy > 0) {
+                                move('down');
+                            } else {
+                                move('up');
+                            }
+                        }
                     }
-                } else {
-                    if (dy > 0) {
-                        move('down');
-                    } else {
-                        move('up');
-                    }
+                    startX = undefined; // Reset for next swipe
+                    startY = undefined;
                 }
             });
 
             gameContainer.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-            });
+                if (!e.target.classList.contains('tile') || !isModificationMode) { // Check if not touching a tile OR if not in modification mode
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }
+            }, { passive: true }); // passive: true for better scroll performance initially
+
+            gameContainer.addEventListener('touchmove', (e) => {
+                if (startX === undefined || isModificationMode) return; // No swipe started OR in modification mode
+
+                const currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
+                const dx = currentX - startX;
+                const dy = currentY - startY;
+
+                if (Math.abs(dx) > swipeThreshold || Math.abs(dy) > swipeThreshold) {
+                    // If a significant swipe is detected in any direction, prevent default browser scrolling
+                    e.preventDefault();
+                }
+            }, { passive: false }); // passive: false to allow preventDefault
 
             gameContainer.addEventListener('touchend', (e) => {
-                const endX = e.changedTouches[0].clientX;
-                const endY = e.changedTouches[0].clientY;
-                const dx = endX - startX;
-                const dy = endY - startY;
+                if (startX !== undefined && !isModificationMode) { // Only process swipe if not in modification mode
+                    const endX = e.changedTouches[0].clientX;
+                    const endY = e.changedTouches[0].clientY;
+                    const dx = endX - startX;
+                    const dy = endY - startY;
 
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 0) {
-                        move('right');
-                    } else {
-                        move('left');
+                    if (Math.abs(dx) > swipeThreshold || Math.abs(dy) > swipeThreshold) { // Only trigger if a significant swipe occurred
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            if (dx > 0) {
+                                move('right');
+                            } else {
+                                move('left');
+                            }
+                        } else {
+                            if (dy > 0) {
+                                move('down');
+                            } else {
+                                move('up');
+                            }
+                        }
                     }
-                } else {
-                    if (dy > 0) {
-                        move('down');
-                    } else {
-                        move('up');
-                    }
+                    startX = undefined; // Reset for next swipe
+                    startY = undefined;
                 }
             });
-
-            // Prevent scrolling on touch devices
-            gameContainer.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-            }, { passive: false });
         }
 
+        // --- Popups and Game State Management ---
         function showPopup(message) {
             popupMessage.textContent = message;
             popup.style.display = 'block';
@@ -273,23 +575,210 @@
 
         function closePopup() {
             popup.style.display = 'none';
-            restartGame();
+            // After game over, prompt for new game or load game
+            showStartScreen();
         }
 
         function restartGame() {
             board = Array(size).fill().map(() => Array(size).fill(0));
             maxTile = 0;
+            selectedTile = null; // Clear selected tile on restart
+            isModificationMode = false; // Reset modification mode on restart
+            updateModifyButtonState(); // Update button text
             updateBoard();
             addRandomTile();
             addRandomTile();
+            hideAllModals(); // Ensure no modals are showing after restart
+            showGameElements(); // Ensure game is visible
         }
 
+        // --- Helper functions for showing/hiding game elements ---
+        function hideGameElements() {
+            gameContainer.style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+        }
+
+        function showGameElements() {
+            gameContainer.style.display = 'flex';
+            document.querySelector('.controls').style.display = 'flex';
+        }
+
+        // --- Save/Load Functions ---
+        function getSavedGames() {
+            const saves = localStorage.getItem(localStorageKey);
+            return saves ? JSON.parse(saves) : [];
+        }
+
+        function saveGame() {
+            const saveName = prompt("请输入存档名称:");
+            if (saveName) {
+                const saves = getSavedGames();
+                const newSave = {
+                    name: saveName,
+                    board: board,
+                    maxTile: maxTile,
+                    timestamp: Date.now() // Record save time
+                };
+
+                // Check if a save with this name already exists and update it
+                const existingIndex = saves.findIndex(s => s.name === saveName);
+                if (existingIndex > -1) {
+                    saves[existingIndex] = newSave;
+                } else {
+                    saves.push(newSave);
+                }
+
+                localStorage.setItem(localStorageKey, JSON.stringify(saves));
+                alert(`游戏已存档: ${saveName}`);
+            }
+        }
+
+        // Function to load game by name
+        function loadGameByName(saveName) {
+            const saves = getSavedGames();
+            const saveToLoad = saves.find(s => s.name === saveName);
+            if (saveToLoad) {
+                board = saveToLoad.board;
+                maxTile = saveToLoad.maxTile;
+                updateBoard();
+                hideAllModals(); // Hide any open modals
+                showGameElements(); // Ensure game board and controls are visible
+                selectedTile = null; // Ensure no tile is selected after loading
+                isModificationMode = false; // Disable modification mode on load
+                updateModifyButtonState(); // Update button text
+            } else {
+                alert("存档未找到！");
+                // If save not found, return to appropriate screen (e.g., start screen or previous game state)
+                hideLoadGameList(); // Go back from load screen
+            }
+        }
+
+        function deleteSave(saveName) {
+            if (confirm(`确定要删除存档 "${saveName}" 吗?`)) {
+                let saves = getSavedGames();
+                saves = saves.filter(s => s.name !== saveName);
+                localStorage.setItem(localStorageKey, JSON.stringify(saves));
+                showLoadGameList(loadGameScreen.dataset.fromGame === 'true'); // Refresh the list, maintaining context
+            }
+        }
+
+        // --- Initial Screen / Modals ---
+        function hideAllModals() {
+            startScreen.style.display = 'none';
+            loadGameScreen.style.display = 'none';
+            popup.style.display = 'none'; // Also hide game over popup
+        }
+
+        function showStartScreen() {
+            hideGameElements(); // Hide game board and controls
+            startScreen.style.display = 'flex';
+        }
+
+        function startNewGame() {
+            hideAllModals();
+            showGameElements(); // Show game board and controls
+            restartGame(); // Start a fresh game
+        }
+
+        // Modified showLoadGameList to handle origin
+        function showLoadGameList(fromGame = false) { // Add a flag to indicate if called from in-game
+            hideGameElements(); // Temporarily hide game elements
+            hideAllModals(); // Ensure no other modals are open
+            loadGameScreen.style.display = 'flex';
+            savedGamesList.innerHTML = ''; // Clear previous list
+
+            // Store the origin to determine return behavior for hideLoadGameList
+            loadGameScreen.dataset.fromGame = fromGame;
+
+            const saves = getSavedGames().sort((a, b) => b.timestamp - a.timestamp); // Sort by most recent first
+
+            if (saves.length === 0) {
+                savedGamesList.innerHTML = '<p style="color: #776e65;">没有可用存档。</p>';
+            } else {
+                saves.forEach(save => {
+                    const li = document.createElement('li');
+                    li.classList.add('load-game-item');
+                    const date = new Date(save.timestamp).toLocaleString();
+                    li.innerHTML = `
+                        <span>${save.name} (最大数字: ${save.maxTile || 0}) <br> <small>${date}</small></span>
+                        <div class="item-buttons">
+                            <button onclick="loadGameByName('${save.name}')">加载</button>
+                            <button class="delete-btn" onclick="deleteSave('${save.name}')">删除</button>
+                        </div>
+                    `;
+                    savedGamesList.appendChild(li);
+                });
+            }
+        }
+
+        // Modified hideLoadGameList to return to appropriate screen based on origin
+        function hideLoadGameList() {
+            loadGameScreen.style.display = 'none';
+            if (loadGameScreen.dataset.fromGame === 'true') {
+                // Was called from in-game, so just hide modal and show game
+                showGameElements();
+            } else {
+                // Was called from start screen, return to start screen
+                showStartScreen();
+            }
+        }
+
+        // --- Modification Mode Toggle Function ---
+        function toggleModificationMode() {
+            isModificationMode = !isModificationMode; // Toggle the state
+            selectedTile = null; // Clear any selected tile when toggling mode
+            updateModifyButtonState(); // Update button text and style
+            updateBoard(); // Re-render board to apply/remove 'clickable' class and clear selection
+            if (isModificationMode) {
+                alert("修改方块数字功能已开启。点击方块可修改其数字，滑动操作将暂时禁用。");
+            } else {
+                alert("修改方块数字功能已关闭。可以正常进行滑动操作。");
+            }
+        }
+
+        // 更新“开启修改”按钮的文本和样式
+        function updateModifyButtonState() {
+            if (isModificationMode) {
+                toggleModifyBtn.textContent = "关闭修改";
+                toggleModifyBtn.style.backgroundColor = "#ff6347"; // 红色
+                toggleModifyBtn.style.color = "white";
+            } else {
+                toggleModifyBtn.textContent = "开启修改";
+                toggleModifyBtn.style.backgroundColor = "#ffcc99"; // 默认色
+                toggleModifyBtn.style.color = "#776e65";
+            }
+            // 根据 isModifyButtonHidden 状态隐藏/显示整个 modify-button-wrapper
+            if (isModifyButtonHidden) {
+                modifyButtonWrapper.classList.add('hidden');
+            } else {
+                modifyButtonWrapper.classList.remove('hidden');
+            }
+        }
+
+        // 新增：切换“开启修改”按钮的可见性
+        function toggleModifyButtonVisibility() {
+            isModifyButtonHidden = !isModifyButtonHidden; // 切换隐藏状态
+            localStorage.setItem(modifyButtonVisibilityKey, isModifyButtonHidden); // 保存到 localStorage
+
+            // 如果当前修改模式是开启的，但用户隐藏了按钮，则强制关闭修改模式
+            if (isModifyButtonHidden && isModificationMode) {
+                isModificationMode = false;
+                selectedTile = null;
+                updateBoard(); // Re-render to clear selection and clickable class
+                alert("由于隐藏了修改功能按钮，修改模式已自动关闭。");
+            }
+            updateModifyButtonState(); // 更新按钮状态和可见性
+        }
+
+        // --- Initialization ---
         function initGame() {
-            addRandomTile();
-            addRandomTile();
             setupInput();
+            showStartScreen(); // Show the initial screen when the page loads
+            updateBoard(); // Initial render of an empty board/reset state
+            updateModifyButtonState(); // Set initial button state based on localStorage
         }
 
+        // Run the initialization
         initGame();
     </script>
 </body>

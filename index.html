@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -470,7 +471,7 @@
         <button id="delete-btn" onclick="deleteMessages()">Delete</button>
         <div id="model-selector">
           <select id="model-options" onchange="changeModel()">
-            <option value="deepseek-ai/DeepSeek-V3-0324">WU WangZe AI</option>
+            <option value="gemini-1.5-flash">WU WangZe AI</option>
           </select>
         </div>
       </div>
@@ -481,7 +482,7 @@
 
   <script>
     var conversation = []; 
-    var selectedModel = "deepseek-ai/DeepSeek-V3-0324"; 
+    var selectedModel = "gemini-1.5-flash"; 
     var sequence = 1; 
     
     //prompt
@@ -521,7 +522,7 @@ conversation.push({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA4ZDMxOTBjLWNjNzItNDc4ZS1hOGYwLTY3NmEwMGY1MDY2ZCIsInR5cGUiOiJpZV9tb2RlbCJ9.q7zRm2BAySo2zOi2QL5m6ukgmbhMZm2Ig4ITmJ3ZsM8",  
+          Authorization: "Bearer sk-mSMhH2Iev9zffIMEQ2ck8Lt1WwA0Nd2sQ5jOWQYOD7DSGYdv",  
         },
         body: JSON.stringify({
           model: selectedModel,
@@ -531,7 +532,7 @@ conversation.push({
           max_tokens: 4096,
         }),
       };    
-      fetch("https://api.gmi-serving.com/v1/chat/completions", requestOptions)
+      fetch("https://api.shubiaobiao.com/v1/chat/completions", requestOptions)
         .then(response => {
           const reader = response.body.getReader();
           const decoder = new TextDecoder();

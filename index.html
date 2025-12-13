@@ -3,34 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>宙长矿工 - 深空霸主</title>
+    <title>宙长矿工 - 深空霸主 (无敌版)</title>
     <style>
-        /* 引入科幻字体，Orbitron用于数字，中文使用系统黑体 */
+        /* 引入科幻字体 */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap');
 
         /* === 全局基础 === */
         body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            margin: 0; padding: 0; overflow: hidden;
             background-color: #000;
             font-family: 'Orbitron', 'Microsoft YaHei', 'SimHei', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
+            user-select: none; -webkit-user-select: none; touch-action: none;
             color: #0ff;
         }
 
         /* 游戏容器 */
         #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+            position: relative; width: 100vw; height: 100vh;
             background: radial-gradient(circle at center, #0b1021 0%, #000000 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
 
         canvas {
@@ -39,225 +30,145 @@
             z-index: 1;
         }
 
+        /* === 秘籍输入框 === */
+        #cheat-box {
+            position: absolute;
+            top: 80px; right: 10px;
+            width: 100px;
+            padding: 5px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            z-index: 2000;
+            outline: none;
+            text-align: center;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+        #cheat-box:focus {
+            background: rgba(0, 20, 40, 0.8); border-color: #0ff; color: #fff; box-shadow: 0 0 10px #0ff;
+        }
+        #cheat-box::placeholder { color: rgba(255,255,255,0.2); }
+
+        /* === 新增：空间跳跃按钮 (过关按钮) === */
+        #warp-btn {
+            position: absolute;
+            top: 130px; left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 30px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #0ff;
+            color: #fff;
+            font-family: 'Orbitron', "Microsoft YaHei", sans-serif;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 0 30px #0ff;
+            z-index: 500;
+            display: none; /* 默认隐藏 */
+            animation: pulseBtn 1.5s infinite ease-in-out;
+            backdrop-filter: blur(5px);
+            text-shadow: 0 0 5px #fff;
+        }
+        #warp-btn:hover {
+            background: rgba(0, 255, 255, 0.6);
+            color: #000;
+        }
+        @keyframes pulseBtn {
+            0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px #0ff; }
+            50% { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 40px #0ff; }
+            100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px #0ff; }
+        }
+
         /* === Loading 遮罩层 === */
         #loading-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.5s;
         }
-        
         .loader-ring {
             width: 80px; height: 80px;
             border: 4px solid rgba(0, 255, 255, 0.2);
-            border-top: 4px solid #0ff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            border-top: 4px solid #0ff; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
             box-shadow: 0 0 20px rgba(0,255,255,0.5);
         }
-
-        .loader-text {
-            font-size: 24px;
-            color: #0ff;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        
+        .loader-text { font-size: 24px; color: #0ff; letter-spacing: 2px; margin-bottom: 10px; font-weight: bold; }
         .loader-slogan {
-            font-size: 18px;
-            color: #ffd700; /* 金色 */
-            margin-bottom: 20px;
-            text-align: center;
-            line-height: 1.6;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            opacity: 0;
-            animation: fadeIn 2s ease-in forwards;
+            font-size: 18px; color: #ffd700; margin-bottom: 20px; text-align: center; line-height: 1.6;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); opacity: 0; animation: fadeIn 2s ease-in forwards;
         }
-
-        .loader-log {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            color: #0a0;
-            height: 20px;
-            opacity: 0.8;
-        }
-
+        .loader-log { font-family: 'Courier New', monospace; font-size: 12px; color: #0a0; height: 20px; opacity: 0.8; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
 
         /* === UI 层 === */
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        /* HUD */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         .hud {
-            position: absolute;
-            top: 15px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 10px;
-            box-sizing: border-box;
+            position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around;
+            padding: 0 10px; box-sizing: border-box;
         }
-
         .hud-panel {
-            background: rgba(10, 20, 35, 0.85);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-left: 4px solid #0ff;
-            padding: 8px 15px;
-            min-width: 70px;
-            transform: skewX(-15deg); /* 科幻倾斜感 */
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
-            backdrop-filter: blur(4px);
+            background: rgba(10, 20, 35, 0.85); border: 1px solid rgba(0, 255, 255, 0.3); border-left: 4px solid #0ff;
+            padding: 8px 15px; min-width: 70px; transform: skewX(-15deg);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); backdrop-filter: blur(4px);
         }
-
-        .hud-content {
-            transform: skewX(15deg); /* 文字正回来 */
-            text-align: center;
-        }
-
-        .hud-label {
-            font-size: 12px; color: #88aaff; letter-spacing: 1px; display: block;
-            font-family: "Microsoft YaHei";
-        }
-        .hud-val {
-            font-size: 22px; font-weight: 700; color: #fff;
-            text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
-        }
+        .hud-content { transform: skewX(15deg); text-align: center; }
+        .hud-label { font-size: 12px; color: #88aaff; letter-spacing: 1px; display: block; font-family: "Microsoft YaHei"; }
+        .hud-val { font-size: 22px; font-weight: 700; color: #fff; text-shadow: 0 0 8px rgba(0, 255, 255, 0.8); }
         .text-gold { color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
         .text-red { color: #ff4444; text-shadow: 0 0 8px rgba(255, 68, 68, 0.6); }
 
-        /* 游戏标题 */
         #game-logo {
-            position: absolute;
-            top: 12%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 60px;
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.05);
-            pointer-events: none;
-            white-space: nowrap;
-            letter-spacing: 15px;
-            z-index: 0;
+            position: absolute; top: 12%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 60px; font-weight: 900; color: rgba(255, 255, 255, 0.05);
+            pointer-events: none; white-space: nowrap; letter-spacing: 15px; z-index: 0;
             font-family: 'Microsoft YaHei', sans-serif;
         }
 
-        /* 底部控制按钮 */
         .controls {
-            position: absolute; bottom: 30px; width: 100%;
-            display: flex; justify-content: space-between;
+            position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between;
             padding: 0 50px; box-sizing: border-box; pointer-events: auto;
         }
-
         .ctrl-btn {
-            width: 110px; height: 110px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.2);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: transform 0.1s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-            font-family: "Microsoft YaHei";
-            font-weight: bold;
-            font-size: 16px;
+            width: 110px; height: 110px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; backdrop-filter: blur(10px); transition: transform 0.1s, box-shadow 0.2s;
+            position: relative; overflow: hidden; font-family: "Microsoft YaHei"; font-weight: bold; font-size: 16px;
         }
         .ctrl-btn:active { transform: scale(0.92); }
-        
-        /* 按钮光效 */
-        .ctrl-btn::before {
-            content:''; position: absolute;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            box-shadow: inset 0 0 20px rgba(255,255,255,0.2);
-        }
-
-        .btn-shoot {
-            background: radial-gradient(circle, rgba(0,255,255,0.2) 0%, rgba(0,0,0,0.8) 100%);
-            border-color: #0ff;
-            box-shadow: 0 0 30px rgba(0,255,255,0.3);
-            color: #0ff;
-        }
-        .btn-bomb {
-            background: radial-gradient(circle, rgba(255,50,50,0.2) 0%, rgba(0,0,0,0.8) 100%);
-            border-color: #ff3333;
-            box-shadow: 0 0 30px rgba(255,0,0,0.3);
-            color: #ffaaaa;
-        }
+        .ctrl-btn::before { content:''; position: absolute; width: 100%; height: 100%; border-radius: 50%; box-shadow: inset 0 0 20px rgba(255,255,255,0.2); }
+        .btn-shoot { background: radial-gradient(circle, rgba(0,255,255,0.2) 0%, rgba(0,0,0,0.8) 100%); border-color: #0ff; box-shadow: 0 0 30px rgba(0,255,255,0.3); color: #0ff; }
+        .btn-bomb { background: radial-gradient(circle, rgba(255,50,50,0.2) 0%, rgba(0,0,0,0.8) 100%); border-color: #ff3333; box-shadow: 0 0 30px rgba(255,0,0,0.3); color: #ffaaaa; }
 
         /* 弹窗 Modal */
         #modal-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 100;
-            display: none;
-            justify-content: center; align-items: center;
-            pointer-events: auto;
+            position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px); z-index: 100; display: none; justify-content: center; align-items: center; pointer-events: auto;
         }
-
         .modal-box {
-            background: rgba(10, 25, 40, 0.95);
-            border: 1px solid #0ff;
-            padding: 40px;
-            text-align: center;
-            max-width: 400px;
-            min-width: 300px;
-            box-shadow: 0 0 50px rgba(0,255,255,0.2);
-            position: relative;
+            background: rgba(10, 25, 40, 0.95); border: 1px solid #0ff; padding: 40px; text-align: center;
+            max-width: 400px; min-width: 300px; box-shadow: 0 0 50px rgba(0,255,255,0.2); position: relative;
         }
-        /* 装饰角标 */
-        .modal-box::after {
-            content: ''; position: absolute; top: -2px; left: -2px; width: 20px; height: 20px;
-            border-top: 3px solid #0ff; border-left: 3px solid #0ff;
-        }
-        .modal-box::before {
-            content: ''; position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px;
-            border-bottom: 3px solid #0ff; border-right: 3px solid #0ff;
-        }
-
+        .modal-box::after { content: ''; position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 3px solid #0ff; border-left: 3px solid #0ff; }
+        .modal-box::before { content: ''; position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 3px solid #0ff; border-right: 3px solid #0ff; }
         .modal-title { font-size: 32px; margin: 0 0 20px; color: #fff; text-shadow: 0 0 10px #0ff; font-family: "Microsoft YaHei"; }
         .modal-text { font-family: "Microsoft YaHei", sans-serif; font-size: 18px; color: #ccc; line-height: 1.6; margin-bottom: 30px; }
-        
         .action-btn {
-            background: transparent;
-            border: 2px solid #0ff;
-            color: #0ff;
-            padding: 12px 40px;
-            font-size: 18px;
-            font-family: "Microsoft YaHei", sans-serif;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
+            background: transparent; border: 2px solid #0ff; color: #0ff; padding: 12px 40px;
+            font-size: 18px; font-family: "Microsoft YaHei", sans-serif; font-weight: bold; cursor: pointer; transition: 0.3s;
         }
         .action-btn:hover { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
 
         /* 浮动文字 */
         .float-text {
-            position: absolute; font-weight: 900; font-size: 24px;
-            pointer-events: none;
-            animation: floatUp 1.2s forwards;
-            text-shadow: 2px 2px 0 #000;
-            z-index: 50;
-            font-family: "Microsoft YaHei";
+            position: absolute; font-weight: 900; font-size: 24px; pointer-events: none;
+            animation: floatUp 1.2s forwards; text-shadow: 2px 2px 0 #000; z-index: 50; font-family: "Microsoft YaHei";
         }
-        @keyframes floatUp { 
-            0% { transform: translateY(0); opacity:1; } 
-            100% { transform: translateY(-80px); opacity:0; } 
-        }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity:1; } 100% { transform: translateY(-80px); opacity:0; } }
     </style>
 </head>
 <body>
@@ -272,6 +183,12 @@
 <div id="game-container">
     <div id="game-logo">宙长矿工</div>
     <canvas id="canvas"></canvas>
+
+    <!-- 秘籍输入框 -->
+    <input type="text" id="cheat-box" placeholder="CMD..." autocomplete="off">
+    
+    <!-- 手动过关按钮 (默认隐藏) -->
+    <div id="warp-btn">🚀 空间跳跃 (进入下一关)</div>
 
     <div id="ui-layer">
         <div class="hud">
@@ -338,35 +255,24 @@ const CONFIG = {
 };
 
 /**
- * 宇宙天体图鉴 (汉化版)
+ * 宇宙天体图鉴
  */
 const CATALOG = {
-    // === 恒星级 ===
     SUN: { type: 'star', val: 1000, weight: 18, radius: 60, name: '太阳', color: ['#ffaa00', '#ff4400'] },
     SIRIUS: { type: 'star', val: 1200, weight: 20, radius: 55, name: '天狼星 A', color: ['#fff', '#00ccff'] },
-    
-    // === 行星级 ===
     EARTH: { type: 'planet_land', val: 200, weight: 5, radius: 28, name: '地球', color: ['#1a44cc', '#112244'] },
     MARS: { type: 'planet', val: 150, weight: 3, radius: 24, name: '火星', color: ['#ff5533', '#882211'] },
     JUPITER: { type: 'planet_band', val: 600, weight: 12, radius: 48, name: '木星', color: ['#d4a373', '#805b38'] },
     SATURN: { type: 'saturn', val: 700, weight: 14, radius: 40, name: '土星', color: ['#e0c090', '#a08050'] },
     NEPTUNE: { type: 'planet', val: 400, weight: 7, radius: 32, name: '海王星', color: ['#3355ff', '#111188'] },
     KEPLER: { type: 'planet_land', val: 550, weight: 8, radius: 30, name: '开普勒-22b', color: ['#22ccaa', '#004433'] },
-    
-    // === 特殊天体 ===
     BLACK_HOLE: { type: 'blackhole', val: 2000, weight: 35, radius: 35, name: '黑洞', color: ['#000', '#500050'] },
     WORMHOLE: { type: 'wormhole', val: 888, weight: 10, radius: 25, name: '虫洞', color: ['#9900ff', '#fff'] },
-    
-    // === 飞船与人造物 (移动目标) ===
     UFO: { type: 'ufo', val: 666, weight: 4, radius: 20, name: 'UFO 飞碟', color: ['#0f0', '#222'], move: true, speed: 1.5 },
     VOYAGER: { type: 'ship', val: 450, weight: 2, radius: 18, name: '旅行者号', color: ['#ccc', '#gold'], move: true, speed: 0.8 },
     ISS: { type: 'station', val: 300, weight: 5, radius: 25, name: '空间站', color: ['#eee', '#444'], move: true, speed: 0.5 },
-
-    // === 资源与道具 ===
     CRYSTAL: { type: 'crystal', val: 900, weight: 1, radius: 15, name: '凯伯晶体', color: ['#00ffff', '#fff'] },
     BAG: { type: 'bag', val: 0, weight: 2, radius: 22, name: '神秘信号', color: ['#ff00ff', '#330033'] },
-    
-    // === 障碍 ===
     ASTEROID_S: { type: 'rock', val: 15, weight: 4, radius: 16, name: '', color: ['#666', '#444'] },
     ASTEROID_L: { type: 'rock', val: 40, weight: 15, radius: 42, name: '', color: ['#555', '#333'] },
     MINE: { type: 'mine', val: 10, weight: 1, radius: 18, name: '太空雷', color: ['#f00', '#500'] }
@@ -385,10 +291,11 @@ class Game {
         this.time = 0;
         this.state = 'LOADING'; 
         this.scale = 1;
-        
+        this.isGodMode = false;
+
         // 实体
         this.hook = {
-            angle: 0, dir: 1, len: 40, status: 0, // 0:摆动, 1:发射, 2:拉回
+            angle: 0, dir: 1, len: 40, status: 0, 
             x: 0, y: 0, item: null
         };
         this.items = [];
@@ -400,17 +307,31 @@ class Game {
         this.resize = this.resize.bind(this);
 
         this.initEvents();
+        this.initCheat();
         this.resize();
         window.addEventListener('resize', this.resize);
 
-        // 模拟加载资源
+        // 模拟加载
         this.simulateLoading().then(() => {
             this.loadSave();
             if (this.money === 0 && this.level === 1) this.startLevel(1);
             else this.showModal(`第 ${this.level} 星区`, `本关目标: <span style="color:#ffd700">${this.calcTarget(this.level)}</span>`, '开始采集', () => this.startLevel(this.level));
             
-            // 启动游戏循环
             requestAnimationFrame(this.loop);
+        });
+    }
+
+    initCheat() {
+        const input = document.getElementById('cheat-box');
+        input.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            if (val === 'wudi') {
+                this.isGodMode = true;
+                this.showFloat("★ 开启无敌：时间无限 ★", CONFIG.DESIGN_W/2, CONFIG.DESIGN_H/2, "#0ff");
+                e.target.value = '';
+                e.target.blur();
+                this.updateUI();
+            }
         });
     }
 
@@ -430,7 +351,7 @@ class Game {
                         resolve();
                     }, 500);
                 }
-            }, 800); // 稍微加长加载时间，让用户看清文案
+            }, 800);
         });
     }
 
@@ -465,13 +386,12 @@ class Game {
     }
 
     initEvents() {
-        // 键盘
         window.addEventListener('keydown', e => {
+            if(document.activeElement === document.getElementById('cheat-box')) return;
             if (this.state !== 'PLAYING') return;
             if (e.code === 'Space' || e.code === 'ArrowDown') this.actionShoot();
             if (e.code === 'ArrowUp') this.actionBomb();
         });
-        // UI按钮
         const bind = (id, fn) => {
             const el = document.getElementById(id);
             el.addEventListener('mousedown', (e) => { e.preventDefault(); fn(); });
@@ -479,8 +399,14 @@ class Game {
         };
         bind('btn-shoot', () => this.state === 'PLAYING' && this.actionShoot());
         bind('btn-bomb', () => this.state === 'PLAYING' && this.actionBomb());
-        // 屏幕点击
         this.canvas.addEventListener('mousedown', () => this.state === 'PLAYING' && this.actionShoot());
+        
+        // --- 新增：手动过关按钮监听 ---
+        document.getElementById('warp-btn').addEventListener('click', () => {
+            if(this.isGodMode && this.money >= this.target) {
+                this.checkEnd(); // 手动触发结算
+            }
+        });
     }
 
     startLevel(lvl) {
@@ -501,12 +427,9 @@ class Game {
     generateItems(lvl) {
         this.items = [];
         const count = 10 + Math.min(lvl * 2, 15);
-        
         for(let i=0; i<count; i++) {
             let key;
             const r = Math.random();
-            
-            // 关卡生成逻辑
             if (lvl >= 3 && r < 0.08) key = 'BLACK_HOLE';
             else if (lvl >= 2 && r < 0.15) key = 'UFO';
             else if (lvl >= 2 && r < 0.20) key = 'VOYAGER';
@@ -517,17 +440,13 @@ class Game {
             else if (r < 0.70) key = 'MINE';
             else if (lvl >= 4 && r < 0.75) key = 'SUN';
             else key = Math.random() > 0.5 ? 'ASTEROID_L' : 'ASTEROID_S';
-
-            // 防止第一关太难
             if (lvl === 1 && ['BLACK_HOLE', 'SUN', 'MINE'].includes(key)) key = 'MARS';
-
             const tmpl = CATALOG[key];
             this.spawnItem(tmpl);
         }
     }
 
     spawnItem(tmpl) {
-        // 寻找无重叠位置
         for(let k=0; k<100; k++) {
             const x = Math.random() * (CONFIG.DESIGN_W - 100) + 50;
             const y = Math.random() * (CONFIG.DESIGN_H - 250) + 200;
@@ -541,7 +460,6 @@ class Game {
                     ...tmpl, x, y, 
                     rot: Math.random()*6.28, 
                     active: true,
-                    // 移动属性
                     vx: tmpl.move ? (Math.random() > 0.5 ? tmpl.speed : -tmpl.speed) : 0
                 };
                 this.items.push(item);
@@ -554,41 +472,39 @@ class Game {
         if(!this.lastT) this.lastT = ts;
         const dt = (ts - this.lastT) / 1000;
         this.lastT = ts;
-
         if (this.state === 'PLAYING') this.update(dt);
         this.draw();
         requestAnimationFrame(this.loop);
     }
 
     update(dt) {
-        // 时间
-        this.time -= dt;
-        if(this.time <= 0) { this.time = 0; this.checkEnd(); }
-        document.getElementById('ui-time').innerText = Math.ceil(this.time);
+        // 无敌模式不减时间
+        if (!this.isGodMode) {
+            this.time -= dt;
+            if(this.time <= 0) { this.time = 0; this.checkEnd(); }
+        }
+        
+        const timeEl = document.getElementById('ui-time');
+        if (this.isGodMode) {
+            if (timeEl.innerText !== '∞') timeEl.innerText = '∞';
+        } else {
+            timeEl.innerText = Math.ceil(this.time);
+        }
 
-        // 钩子逻辑
         const ox = CONFIG.DESIGN_W / 2;
         const oy = CONFIG.HOOK_ORIGIN_Y;
 
         if(this.hook.status === 0) {
-            // 摆动
             this.hook.angle += CONFIG.SWING_SPEED * this.hook.dir;
             if(Math.abs(this.hook.angle) > CONFIG.MAX_ANGLE) this.hook.dir *= -1;
         } else if(this.hook.status === 1) {
-            // 发射
             this.hook.len += CONFIG.HOOK_SPEED_OUT;
-            
-            // 计算尖端坐标
             const rad = this.hook.angle * Math.PI / 180;
             this.hook.x = ox + Math.sin(rad) * this.hook.len;
             this.hook.y = oy + Math.cos(rad) * this.hook.len;
-
-            // 越界
             if(this.hook.x<0 || this.hook.x>CONFIG.DESIGN_W || this.hook.y>CONFIG.DESIGN_H) {
                 this.hook.status = 2;
             }
-
-            // 碰撞
             for(let it of this.items) {
                 if(!it.active) continue;
                 if(Math.hypot(this.hook.x - it.x, this.hook.y - it.y) < it.radius + 5) {
@@ -604,7 +520,6 @@ class Game {
                 }
             }
         } else if(this.hook.status === 2) {
-            // 拉回
             let speed = CONFIG.HOOK_SPEED_IN;
             if(this.hook.item) {
                 speed = Math.max(1, CONFIG.HOOK_SPEED_IN / (this.hook.item.weight * 0.3));
@@ -612,7 +527,6 @@ class Game {
                 speed *= 2;
             }
             this.hook.len -= speed;
-
             if(this.hook.len <= 40) {
                 this.hook.len = 40;
                 this.hook.status = 0;
@@ -621,14 +535,11 @@ class Game {
                     this.hook.item = null;
                 }
             }
-            
-            // 尖端跟随
             const rad = this.hook.angle * Math.PI / 180;
             this.hook.x = ox + Math.sin(rad) * this.hook.len;
             this.hook.y = oy + Math.cos(rad) * this.hook.len;
         }
 
-        // 更新物体位置
         this.items.forEach(it => {
             if(it.active && it.vx !== 0) {
                 it.x += it.vx;
@@ -640,7 +551,6 @@ class Game {
             }
         });
 
-        // 粒子
         for(let i=this.particles.length-1; i>=0; i--) {
             const p = this.particles[i];
             p.life--;
@@ -666,16 +576,13 @@ class Game {
         let val = item.val;
         let txt = `+${val}`;
         let col = '#fff';
-
         if(item.type === 'bag') {
             const r = Math.random();
             if(r < 0.4) { val = Math.floor(Math.random()*800)+200; txt=`$${val}`; col='#ffd700'; }
             else if(r < 0.7) { this.bombs++; val=0; txt="鱼雷 +1"; col='#f00'; }
             else { val=10; txt="太空垃圾"; col='#888'; }
         }
-
         if(val > 0) this.money += val;
-        
         this.showFloat(txt, CONFIG.DESIGN_W/2, 200, col);
         this.updateUI();
     }
@@ -683,7 +590,6 @@ class Game {
     explode(center) {
         this.createExplosion(center.x, center.y, 50, '#ffaa00');
         center.active = false;
-        // 连锁反应
         this.items.forEach(it => {
             if(it.active && Math.hypot(it.x - center.x, it.y - center.y) < 150) {
                 it.active = false;
@@ -695,33 +601,24 @@ class Game {
     draw() {
         const ctx = this.ctx;
         ctx.clearRect(0, 0, CONFIG.DESIGN_W, CONFIG.DESIGN_H);
-
-        // 1. 星空背景
         this.bgStars.forEach(s => {
             s.a += (Math.random()-0.5)*0.05;
             if(s.a<0.2) s.a=0.2; if(s.a>1) s.a=1;
             ctx.fillStyle = `rgba(255,255,255,${s.a})`;
             ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
         });
-
-        // 2. 飞船
         this.drawPlayer(CONFIG.DESIGN_W/2, CONFIG.HOOK_ORIGIN_Y - 30);
-
-        // 3. 绳索
         const rad = this.hook.angle * Math.PI / 180;
         let hx = this.hook.x, hy = this.hook.y;
         if(this.hook.status === 0) {
             hx = CONFIG.DESIGN_W/2 + Math.sin(rad) * 40;
             hy = CONFIG.HOOK_ORIGIN_Y + Math.cos(rad) * 40;
         }
-
         ctx.shadowBlur = 10; ctx.shadowColor = '#0ff';
         ctx.strokeStyle = '#0ff'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(CONFIG.DESIGN_W/2, CONFIG.HOOK_ORIGIN_Y);
         ctx.lineTo(hx, hy); ctx.stroke();
         ctx.shadowBlur = 0;
-
-        // 4. 钩子头
         ctx.save();
         ctx.translate(hx, hy);
         ctx.rotate(rad);
@@ -730,13 +627,9 @@ class Game {
         ctx.beginPath(); ctx.moveTo(-6,-6); ctx.lineTo(-10,4); ctx.lineTo(-4,12); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(6,-6); ctx.lineTo(10,4); ctx.lineTo(4,12); ctx.stroke();
         ctx.restore();
-
-        // 5. 物体
         this.items.forEach(it => {
             if(it.active || it === this.hook.item) this.drawItem(it);
         });
-
-        // 6. 粒子
         this.particles.forEach(p => {
             ctx.globalAlpha = p.life / 30;
             ctx.fillStyle = p.col;
@@ -749,13 +642,10 @@ class Game {
         const ctx = this.ctx;
         ctx.save();
         ctx.translate(x, y);
-        // 主体
         ctx.fillStyle = '#222'; ctx.beginPath();
         ctx.ellipse(0, 0, 35, 12, 0, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = '#0ff'; ctx.lineWidth = 2; ctx.stroke();
-        // 舱室
         ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(0, -6, 12, 0, Math.PI*2); ctx.fill();
-        // 引擎火光
         if(this.hook.status === 2) {
             ctx.fillStyle = '#f50'; ctx.beginPath();
             ctx.moveTo(-20, 5); ctx.lineTo(-25, 20+Math.random()*5); ctx.lineTo(-15, 5); ctx.fill();
@@ -769,25 +659,19 @@ class Game {
         const r = it.radius;
         ctx.save();
         ctx.translate(it.x, it.y);
-        
         if(it !== this.hook.item && !it.move) ctx.rotate(it.rot); 
-
-        // === 渲染不同类型 ===
         if(it.type === 'blackhole') {
             const grd = ctx.createRadialGradient(0,0,r*0.2, 0,0,r);
             grd.addColorStop(0, '#000'); grd.addColorStop(0.5, '#000'); grd.addColorStop(1, '#500050');
             ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
             ctx.strokeStyle = '#a0a'; ctx.lineWidth=2; ctx.stroke();
-            // 吸积盘
             ctx.strokeStyle = 'rgba(255,0,255,0.5)';
             ctx.beginPath(); ctx.ellipse(0, 0, r*1.6, r*0.4, -0.5, 0, Math.PI*2); ctx.stroke();
-        }
-        else if(it.type === 'wormhole') {
+        } else if(it.type === 'wormhole') {
             ctx.fillStyle = '#309'; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
             ctx.strokeStyle = '#fff'; ctx.setLineDash([5,5]); ctx.beginPath(); ctx.arc(0,0,r-5,0,Math.PI*2); ctx.stroke();
             ctx.setLineDash([]);
-        }
-        else if(it.type === 'ufo') {
+        } else if(it.type === 'ufo') {
             ctx.fillStyle = '#888';
             ctx.beginPath(); ctx.ellipse(0, 5, r, r*0.4, 0, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#0f0';
@@ -796,26 +680,21 @@ class Game {
                 ctx.fillStyle='red'; ctx.beginPath(); ctx.arc(-r*0.6, 5, 3, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.arc(r*0.6, 5, 3, 0, Math.PI*2); ctx.fill();
             }
-        }
-        else if(it.type === 'ship') {
+        } else if(it.type === 'ship') {
             ctx.rotate(it.vx > 0 ? 0 : Math.PI);
             ctx.fillStyle = '#ccc';
             ctx.beginPath(); ctx.moveTo(r, 0); ctx.lineTo(-r, -r/2); ctx.lineTo(-r, r/2); ctx.fill();
             ctx.fillStyle = '#0ff'; ctx.fillRect(-r, -3, 5, 6);
-        }
-        else if(it.type === 'station') {
+        } else if(it.type === 'station') {
             ctx.fillStyle = '#555'; ctx.fillRect(-r, -r/4, r*2, r/2);
             ctx.fillStyle = '#aaa'; ctx.fillRect(-r/4, -r, r/2, r*2);
             ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
-        }
-        else if(it.type === 'planet' || it.type === 'star' || it.type === 'planet_land' || it.type === 'planet_band') {
+        } else if(it.type === 'planet' || it.type === 'star' || it.type === 'planet_land' || it.type === 'planet_band') {
             const grd = ctx.createRadialGradient(-r*0.3,-r*0.3,0, 0,0,r);
             grd.addColorStop(0, it.color[0]); grd.addColorStop(1, it.color[1]);
-            
             if(it.type === 'star') { ctx.shadowBlur = 30; ctx.shadowColor = it.color[0]; }
             ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
             ctx.shadowBlur = 0;
-
             if(it.type === 'planet_land') {
                 ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath(); ctx.arc(-5,-5, r*0.4, 0, Math.PI*2); ctx.fill();
@@ -825,15 +704,13 @@ class Game {
                 ctx.fillStyle = 'rgba(0,0,0,0.2)';
                 ctx.fillRect(-r, -5, r*2, 10);
             }
-        }
-        else if(it.type === 'saturn') {
+        } else if(it.type === 'saturn') {
             const grd = ctx.createRadialGradient(0,0,0,0,0,r);
             grd.addColorStop(0, it.color[0]); grd.addColorStop(1, it.color[1]);
             ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
             ctx.strokeStyle = 'rgba(200,200,200,0.6)'; ctx.lineWidth = 6;
             ctx.beginPath(); ctx.ellipse(0,0,r*1.8, r*0.6, -0.3, 0, Math.PI*2); ctx.stroke();
-        }
-        else if(it.type === 'rock') {
+        } else if(it.type === 'rock') {
             ctx.fillStyle = it.color[0];
             ctx.beginPath();
             for(let i=0; i<7; i++) {
@@ -842,30 +719,24 @@ class Game {
                 ctx.lineTo(Math.cos(a)*d, Math.sin(a)*d);
             }
             ctx.fill();
-        }
-        else if(it.type === 'bag') {
+        } else if(it.type === 'bag') {
             ctx.fillStyle = '#808'; ctx.beginPath();
             ctx.roundRect(-12, -15, 24, 30, 8); ctx.fill();
             ctx.strokeStyle = '#f0f'; ctx.lineWidth=2; ctx.stroke();
             ctx.fillStyle = '#fff'; ctx.font='bold 16px Arial'; 
             ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('?',0,2);
-        }
-        else if(it.type === 'mine') {
+        } else if(it.type === 'mine') {
             ctx.fillStyle = '#400'; ctx.beginPath(); ctx.arc(0,0,r*0.7,0,Math.PI*2); ctx.fill();
             ctx.fillStyle = '#f00'; 
             for(let i=0; i<8; i++) {
                 ctx.rotate(Math.PI/4); ctx.fillRect(r*0.6, -2, 6, 4);
             }
-        }
-        else if(it.type === 'crystal') {
+        } else if(it.type === 'crystal') {
             ctx.fillStyle = '#0ff'; ctx.beginPath(); 
             ctx.moveTo(0,-r); ctx.lineTo(r,0); ctx.lineTo(0,r); ctx.lineTo(-r,0); ctx.fill();
             ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.moveTo(0,-r); ctx.lineTo(5,0); ctx.lineTo(0,r); ctx.fill();
         }
-
         ctx.restore();
-
-        // 绘制名称
         if(it.name && it !== this.hook.item && it.active) {
             ctx.fillStyle = 'rgba(0, 255, 255, 0.7)';
             ctx.font = '12px "Microsoft YaHei"';
@@ -895,6 +766,9 @@ class Game {
 
     checkEnd() {
         this.state = 'MENU';
+        // 隐藏跳跃按钮
+        document.getElementById('warp-btn').style.display = 'none';
+
         if(this.money >= this.target) {
             this.showModal('任务完成', 
                 `状态：成功<br>能量：<span style="color:#ffd700">${this.money}</span> / ${this.target}`,
@@ -924,6 +798,19 @@ class Game {
         document.getElementById('ui-target').innerText = this.target;
         document.getElementById('ui-level').innerText = this.level;
         document.getElementById('ui-bomb').innerText = this.bombs;
+        
+        if(this.isGodMode) {
+            document.getElementById('ui-time').innerText = "∞";
+            // 检查是否达到目标以显示过关按钮
+            const warpBtn = document.getElementById('warp-btn');
+            if (this.money >= this.target) {
+                warpBtn.style.display = 'block';
+            } else {
+                warpBtn.style.display = 'none';
+            }
+        } else {
+            document.getElementById('warp-btn').style.display = 'none';
+        }
     }
 
     resetHook() {

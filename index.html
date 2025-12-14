@@ -2,839 +2,731 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>宙长矿工 - 深空霸主 (无敌版)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cyber Runner: Final Fix</title>
     <style>
-        /* 引入科幻字体 */
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap');
-
-        /* === 全局基础 === */
-        body {
-            margin: 0; padding: 0; overflow: hidden;
-            background-color: #000;
-            font-family: 'Orbitron', 'Microsoft YaHei', 'SimHei', sans-serif;
-            user-select: none; -webkit-user-select: none; touch-action: none;
-            color: #0ff;
-        }
-
-        /* 游戏容器 */
-        #game-container {
-            position: relative; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, #0b1021 0%, #000000 100%);
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
-        }
-
-        canvas {
-            box-shadow: 0 0 60px rgba(0, 200, 255, 0.15);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            z-index: 1;
-        }
-
-        /* === 秘籍输入框 === */
-        #cheat-box {
-            position: absolute;
-            top: 80px; right: 10px;
-            width: 100px;
-            padding: 5px 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.5);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
-            z-index: 2000;
-            outline: none;
-            text-align: center;
-            border-radius: 4px;
-            transition: 0.3s;
-        }
-        #cheat-box:focus {
-            background: rgba(0, 20, 40, 0.8); border-color: #0ff; color: #fff; box-shadow: 0 0 10px #0ff;
-        }
-        #cheat-box::placeholder { color: rgba(255,255,255,0.2); }
-
-        /* === 新增：空间跳跃按钮 (过关按钮) === */
-        #warp-btn {
-            position: absolute;
-            top: 130px; left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 30px;
-            background: rgba(0, 255, 255, 0.2);
-            border: 2px solid #0ff;
-            color: #fff;
-            font-family: 'Orbitron', "Microsoft YaHei", sans-serif;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 0 30px #0ff;
-            z-index: 500;
-            display: none; /* 默认隐藏 */
-            animation: pulseBtn 1.5s infinite ease-in-out;
-            backdrop-filter: blur(5px);
-            text-shadow: 0 0 5px #fff;
-        }
-        #warp-btn:hover {
-            background: rgba(0, 255, 255, 0.6);
-            color: #000;
-        }
-        @keyframes pulseBtn {
-            0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px #0ff; }
-            50% { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 40px #0ff; }
-            100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px #0ff; }
-        }
-
-        /* === Loading 遮罩层 === */
-        #loading-layer {
+        body { margin: 0; overflow: hidden; background: #111; font-family: 'Segoe UI', sans-serif; user-select: none; }
+        #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        /* UI 界面样式 */
+        .ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s;
+            pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;
         }
-        .loader-ring {
-            width: 80px; height: 80px;
-            border: 4px solid rgba(0, 255, 255, 0.2);
-            border-top: 4px solid #0ff; border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(0,255,255,0.5);
+        .top-bar {
+            padding: 20px; display: flex; justify-content: space-between; align-items: flex-start;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
-        .loader-text { font-size: 24px; color: #0ff; letter-spacing: 2px; margin-bottom: 10px; font-weight: bold; }
-        .loader-slogan {
-            font-size: 18px; color: #ffd700; margin-bottom: 20px; text-align: center; line-height: 1.6;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); opacity: 0; animation: fadeIn 2s ease-in forwards;
+        .stat-group { color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .label { font-size: 12px; color: #aaa; letter-spacing: 1px; font-weight: bold; }
+        .value { font-size: 32px; font-weight: 800; font-family: monospace; }
+        #hp-value { color: #ef4444; }
+        #score-value { color: #fbbf24; }
+        
+        /* Buff 状态栏 */
+        #buff-bar {
+            display: flex; gap: 10px; margin-top: 10px;
         }
-        .loader-log { font-family: 'Courier New', monospace; font-size: 12px; color: #0a0; height: 20px; opacity: 0.8; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
-
-        /* === UI 层 === */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        .hud {
-            position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around;
-            padding: 0 10px; box-sizing: border-box;
-        }
-        .hud-panel {
-            background: rgba(10, 20, 35, 0.85); border: 1px solid rgba(0, 255, 255, 0.3); border-left: 4px solid #0ff;
-            padding: 8px 15px; min-width: 70px; transform: skewX(-15deg);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); backdrop-filter: blur(4px);
-        }
-        .hud-content { transform: skewX(15deg); text-align: center; }
-        .hud-label { font-size: 12px; color: #88aaff; letter-spacing: 1px; display: block; font-family: "Microsoft YaHei"; }
-        .hud-val { font-size: 22px; font-weight: 700; color: #fff; text-shadow: 0 0 8px rgba(0, 255, 255, 0.8); }
-        .text-gold { color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
-        .text-red { color: #ff4444; text-shadow: 0 0 8px rgba(255, 68, 68, 0.6); }
-
-        #game-logo {
-            position: absolute; top: 12%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 60px; font-weight: 900; color: rgba(255, 255, 255, 0.05);
-            pointer-events: none; white-space: nowrap; letter-spacing: 15px; z-index: 0;
-            font-family: 'Microsoft YaHei', sans-serif;
+        .buff {
+            background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px;
+            font-size: 14px; font-weight: bold; color: white; display: none;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        .controls {
-            position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between;
-            padding: 0 50px; box-sizing: border-box; pointer-events: auto;
+        /* 菜单遮罩 */
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(17, 24, 39, 0.95);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 20; pointer-events: auto;
+            transition: opacity 0.3s;
         }
-        .ctrl-btn {
-            width: 110px; height: 110px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; backdrop-filter: blur(10px); transition: transform 0.1s, box-shadow 0.2s;
-            position: relative; overflow: hidden; font-family: "Microsoft YaHei"; font-weight: bold; font-size: 16px;
+        #overlay.hidden { opacity: 0; pointer-events: none; }
+        
+        h1 {
+            color: #34d399; font-size: 56px; margin: 0 0 10px 0;
+            text-transform: uppercase; font-style: italic;
+            text-shadow: 0 0 20px rgba(52, 211, 153, 0.6);
         }
-        .ctrl-btn:active { transform: scale(0.92); }
-        .ctrl-btn::before { content:''; position: absolute; width: 100%; height: 100%; border-radius: 50%; box-shadow: inset 0 0 20px rgba(255,255,255,0.2); }
-        .btn-shoot { background: radial-gradient(circle, rgba(0,255,255,0.2) 0%, rgba(0,0,0,0.8) 100%); border-color: #0ff; box-shadow: 0 0 30px rgba(0,255,255,0.3); color: #0ff; }
-        .btn-bomb { background: radial-gradient(circle, rgba(255,50,50,0.2) 0%, rgba(0,0,0,0.8) 100%); border-color: #ff3333; box-shadow: 0 0 30px rgba(255,0,0,0.3); color: #ffaaaa; }
+        
+        .mode-select {
+            display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; justify-content: center;
+        }
+        
+        button {
+            background: linear-gradient(145deg, #1f2937, #111827);
+            border: 2px solid #374151;
+            padding: 20px 30px; color: white;
+            font-size: 18px; font-weight: bold; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s;
+            min-width: 120px;
+            pointer-events: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        button:hover { border-color: #34d399; color: #34d399; transform: translateY(-3px); }
+        button:active { transform: scale(0.95); }
+        
+        button.god-mode { border-color: #f59e0b; color: #f59e0b; }
+        button.god-mode:hover { background: #f59e0b; color: #000; }
 
-        /* 弹窗 Modal */
-        #modal-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px); z-index: 100; display: none; justify-content: center; align-items: center; pointer-events: auto;
-        }
-        .modal-box {
-            background: rgba(10, 25, 40, 0.95); border: 1px solid #0ff; padding: 40px; text-align: center;
-            max-width: 400px; min-width: 300px; box-shadow: 0 0 50px rgba(0,255,255,0.2); position: relative;
-        }
-        .modal-box::after { content: ''; position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 3px solid #0ff; border-left: 3px solid #0ff; }
-        .modal-box::before { content: ''; position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 3px solid #0ff; border-right: 3px solid #0ff; }
-        .modal-title { font-size: 32px; margin: 0 0 20px; color: #fff; text-shadow: 0 0 10px #0ff; font-family: "Microsoft YaHei"; }
-        .modal-text { font-family: "Microsoft YaHei", sans-serif; font-size: 18px; color: #ccc; line-height: 1.6; margin-bottom: 30px; }
-        .action-btn {
-            background: transparent; border: 2px solid #0ff; color: #0ff; padding: 12px 40px;
-            font-size: 18px; font-family: "Microsoft YaHei", sans-serif; font-weight: bold; cursor: pointer; transition: 0.3s;
-        }
-        .action-btn:hover { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
-
-        /* 浮动文字 */
-        .float-text {
-            position: absolute; font-weight: 900; font-size: 24px; pointer-events: none;
-            animation: floatUp 1.2s forwards; text-shadow: 2px 2px 0 #000; z-index: 50; font-family: "Microsoft YaHei";
-        }
-        @keyframes floatUp { 0% { transform: translateY(0); opacity:1; } 100% { transform: translateY(-80px); opacity:0; } }
+        .subtitle { color: #9ca3af; margin-bottom: 40px; font-size: 16px; max-width: 400px; text-align: center; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-<div id="loading-layer">
-    <div class="loader-ring"></div>
-    <div class="loader-text">系统初始化中</div>
-    <div class="loader-slogan">黄金矿工不如深邃星空<br>黄金万两不如激光一响</div>
-    <div class="loader-log" id="loading-log">正在连接主机...</div>
-</div>
+    <div id="game-container"></div>
 
-<div id="game-container">
-    <div id="game-logo">宙长矿工</div>
-    <canvas id="canvas"></canvas>
-
-    <!-- 秘籍输入框 -->
-    <input type="text" id="cheat-box" placeholder="CMD..." autocomplete="off">
-    
-    <!-- 手动过关按钮 (默认隐藏) -->
-    <div id="warp-btn">🚀 空间跳跃 (进入下一关)</div>
-
-    <div id="ui-layer">
-        <div class="hud">
-            <div class="hud-panel">
-                <div class="hud-content">
-                    <span class="hud-label">目标能量</span>
-                    <span class="hud-val text-gold" id="ui-target">0</span>
+    <div class="ui-layer">
+        <div class="top-bar">
+            <div class="stat-group">
+                <div class="label">ARMOR / HP</div>
+                <div class="value" id="hp-value">100</div>
+                <div id="buff-bar">
+                    <div id="buff-shield" class="buff" style="color:#60a5fa">SHIELD</div>
+                    <div id="buff-magnet" class="buff" style="color:#fbbf24">MAGNET</div>
                 </div>
             </div>
-            <div class="hud-panel">
-                <div class="hud-content">
-                    <span class="hud-label">当前能量</span>
-                    <span class="hud-val text-gold" id="ui-money">0</span>
-                </div>
-            </div>
-            <div class="hud-panel">
-                <div class="hud-content">
-                    <span class="hud-label">剩余时间</span>
-                    <span class="hud-val text-red" id="ui-time">60</span>
-                </div>
-            </div>
-            <div class="hud-panel">
-                <div class="hud-content">
-                    <span class="hud-label">星区</span>
-                    <span class="hud-val" id="ui-level">1</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="ctrl-btn btn-bomb" id="btn-bomb">
-                <div>光子鱼雷</div>
-                <div style="font-size:14px; margin-top:5px">x<span id="ui-bomb">0</span></div>
-            </div>
-            <div class="ctrl-btn btn-shoot" id="btn-shoot">
-                <div>发射激光</div>
+            <div class="stat-group" style="text-align: right;">
+                <div class="label">SCORE</div>
+                <div class="value" id="score-value">00000</div>
+                <div class="label" style="margin-top:5px; font-size:10px;">BEST: <span id="best-score">0</span></div>
             </div>
         </div>
     </div>
 
-    <!-- 弹窗 -->
-    <div id="modal-overlay">
-        <div class="modal-box">
-            <h2 class="modal-title" id="modal-title">标题</h2>
-            <div class="modal-text" id="modal-content">内容</div>
-            <button class="action-btn" id="modal-btn">按钮</button>
-        </div>
-    </div>
-</div>
-
-<script>
-/**
- * 配置常量
- */
-const CONFIG = {
-    DESIGN_W: 1024,
-    DESIGN_H: 768,
-    HOOK_SPEED_OUT: 9,
-    HOOK_SPEED_IN: 13,
-    HOOK_ORIGIN_Y: 85,
-    SWING_SPEED: 1.3,
-    MAX_ANGLE: 75,
-    TIME_LIMIT: 60
-};
-
-/**
- * 宇宙天体图鉴
- */
-const CATALOG = {
-    SUN: { type: 'star', val: 1000, weight: 18, radius: 60, name: '太阳', color: ['#ffaa00', '#ff4400'] },
-    SIRIUS: { type: 'star', val: 1200, weight: 20, radius: 55, name: '天狼星 A', color: ['#fff', '#00ccff'] },
-    EARTH: { type: 'planet_land', val: 200, weight: 5, radius: 28, name: '地球', color: ['#1a44cc', '#112244'] },
-    MARS: { type: 'planet', val: 150, weight: 3, radius: 24, name: '火星', color: ['#ff5533', '#882211'] },
-    JUPITER: { type: 'planet_band', val: 600, weight: 12, radius: 48, name: '木星', color: ['#d4a373', '#805b38'] },
-    SATURN: { type: 'saturn', val: 700, weight: 14, radius: 40, name: '土星', color: ['#e0c090', '#a08050'] },
-    NEPTUNE: { type: 'planet', val: 400, weight: 7, radius: 32, name: '海王星', color: ['#3355ff', '#111188'] },
-    KEPLER: { type: 'planet_land', val: 550, weight: 8, radius: 30, name: '开普勒-22b', color: ['#22ccaa', '#004433'] },
-    BLACK_HOLE: { type: 'blackhole', val: 2000, weight: 35, radius: 35, name: '黑洞', color: ['#000', '#500050'] },
-    WORMHOLE: { type: 'wormhole', val: 888, weight: 10, radius: 25, name: '虫洞', color: ['#9900ff', '#fff'] },
-    UFO: { type: 'ufo', val: 666, weight: 4, radius: 20, name: 'UFO 飞碟', color: ['#0f0', '#222'], move: true, speed: 1.5 },
-    VOYAGER: { type: 'ship', val: 450, weight: 2, radius: 18, name: '旅行者号', color: ['#ccc', '#gold'], move: true, speed: 0.8 },
-    ISS: { type: 'station', val: 300, weight: 5, radius: 25, name: '空间站', color: ['#eee', '#444'], move: true, speed: 0.5 },
-    CRYSTAL: { type: 'crystal', val: 900, weight: 1, radius: 15, name: '凯伯晶体', color: ['#00ffff', '#fff'] },
-    BAG: { type: 'bag', val: 0, weight: 2, radius: 22, name: '神秘信号', color: ['#ff00ff', '#330033'] },
-    ASTEROID_S: { type: 'rock', val: 15, weight: 4, radius: 16, name: '', color: ['#666', '#444'] },
-    ASTEROID_L: { type: 'rock', val: 40, weight: 15, radius: 42, name: '', color: ['#555', '#333'] },
-    MINE: { type: 'mine', val: 10, weight: 1, radius: 18, name: '太空雷', color: ['#f00', '#500'] }
-};
-
-class Game {
-    constructor() {
-        this.canvas = document.getElementById('canvas');
-        this.ctx = this.canvas.getContext('2d');
+    <div id="overlay">
+        <h1 id="title-text">CYBER RUN</h1>
+        <div class="subtitle" id="msg-text">选择你的初始装甲强度</div>
         
-        // 游戏状态数据
-        this.level = 1;
-        this.money = 0;
-        this.target = 0;
-        this.bombs = 0;
-        this.time = 0;
-        this.state = 'LOADING'; 
-        this.scale = 1;
-        this.isGodMode = false;
+        <div class="mode-select" id="start-menu">
+            <button onclick="startGame(100)">标准<br><span style="font-size:12px; color:#aaa">100 HP</span></button>
+            <button onclick="startGame(200)">强化<br><span style="font-size:12px; color:#aaa">200 HP</span></button>
+            <button onclick="startGame(1000)">重装<br><span style="font-size:12px; color:#aaa">1000 HP</span></button>
+            <button class="god-mode" onclick="startGame(999999)">GOD<br><span style="font-size:12px">无限 HP</span></button>
+        </div>
+        
+        <div class="mode-select hidden" id="restart-menu">
+            <button onclick="showStartMenu()">返回主菜单</button>
+            <button onclick="restartLastMode()">快速重试</button>
+        </div>
+    </div>
 
-        // 实体
-        this.hook = {
-            angle: 0, dir: 1, len: 40, status: 0, 
-            x: 0, y: 0, item: null
-        };
-        this.items = [];
-        this.particles = [];
-        this.bgStars = [];
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
 
-        // 绑定上下文
-        this.loop = this.loop.bind(this);
-        this.resize = this.resize.bind(this);
+    <script type="module">
+        import * as THREE from 'three';
 
-        this.initEvents();
-        this.initCheat();
-        this.resize();
-        window.addEventListener('resize', this.resize);
-
-        // 模拟加载
-        this.simulateLoading().then(() => {
-            this.loadSave();
-            if (this.money === 0 && this.level === 1) this.startLevel(1);
-            else this.showModal(`第 ${this.level} 星区`, `本关目标: <span style="color:#ffd700">${this.calcTarget(this.level)}</span>`, '开始采集', () => this.startLevel(this.level));
-            
-            requestAnimationFrame(this.loop);
-        });
-    }
-
-    initCheat() {
-        const input = document.getElementById('cheat-box');
-        input.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            if (val === 'wudi') {
-                this.isGodMode = true;
-                this.showFloat("★ 开启无敌：时间无限 ★", CONFIG.DESIGN_W/2, CONFIG.DESIGN_H/2, "#0ff");
-                e.target.value = '';
-                e.target.blur();
-                this.updateUI();
+        // ==========================================
+        // 1. 全局配置
+        // ==========================================
+        const CONFIG = {
+            laneWidth: 3.5,
+            chunkSize: 40,
+            chunkCount: 15,
+            colors: {
+                sky: 0x0f172a,
+                ground: 0x1e293b,
+                hero: 0xec4899,
+                heroFlash: 0xffffff,
+                obstacleLow: 0xdc2626,
+                obstacleHigh: 0x475569,
+                coin: 0xf59e0b,
+                magnet: 0x3b82f6,
+                shield: 0x10b981
+            },
+            physics: {
+                speedBase: 25,
+                speedMax: 65,
+                accel: 1.0,
+                jumpForce: 18,
+                gravity: -45,
+                laneSpeed: 12
             }
-        });
-    }
+        };
 
-    simulateLoading() {
-        return new Promise(resolve => {
-            const logs = ["正在加载物理引擎...", "正在生成星系数据...", "正在校准激光牵引束...", "系统准备就绪。"];
-            let i = 0;
-            const el = document.getElementById('loading-log');
-            const interval = setInterval(() => {
-                if (i < logs.length) {
-                    el.innerText = logs[i++];
+        // 全局桥接
+        window.startGame = (hp) => gameInstance.start(hp);
+        window.showStartMenu = () => gameInstance.showMenu();
+        window.restartLastMode = () => gameInstance.start(gameInstance.lastHpMode);
+
+        // ==========================================
+        // 2. 角色类 (Hero)
+        // ==========================================
+        class Hero {
+            constructor(scene) {
+                this.scene = scene;
+                this.mesh = new THREE.Group();
+                this.lane = 0; this.targetX = 0;
+                this.velocityY = 0;
+                this.isJumping = false; this.isDucking = false; this.isDead = false;
+                this.runTime = 0; this.duckTimer = 0; this.flashTimer = 0;
+                
+                this.initModel();
+                this.scene.add(this.mesh);
+            }
+
+            initModel() {
+                this.matBody = new THREE.MeshPhongMaterial({ color: CONFIG.colors.hero, flatShading: true });
+                this.matFlash = new THREE.MeshBasicMaterial({ color: 0xffffff }); 
+
+                this.bodyGroup = new THREE.Group();
+                this.mesh.add(this.bodyGroup);
+
+                this.torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), this.matBody);
+                this.torso.position.y = 1.5;
+                this.torso.castShadow = true;
+                this.bodyGroup.add(this.torso);
+
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), this.matBody);
+                head.position.y = 0.9; head.castShadow = true;
+                this.torso.add(head);
+
+                const jetpack = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.3), new THREE.MeshPhongMaterial({color: 0x333333}));
+                jetpack.position.set(0, 0, 0.3);
+                this.torso.add(jetpack);
+
+                const limbGeo = new THREE.BoxGeometry(0.25, 0.9, 0.25);
+                limbGeo.translate(0, -0.4, 0);
+                const mkLimb = (x, y) => {
+                    const m = new THREE.Mesh(limbGeo, this.matBody);
+                    m.position.set(x, y, 0); m.castShadow = true;
+                    return m;
+                }
+                this.armL = mkLimb(-0.55, 0.4); this.armR = mkLimb(0.55, 0.4);
+                this.legL = mkLimb(-0.25, -0.5); this.legR = mkLimb(0.25, -0.5);
+                this.torso.add(this.armL, this.armR, this.legL, this.legR);
+
+                this.shieldMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(1.2, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: CONFIG.colors.shield, transparent: true, opacity: 0.3, wireframe: true })
+                );
+                this.shieldMesh.position.y = 1.5;
+                this.shieldMesh.visible = false;
+                this.mesh.add(this.shieldMesh);
+            }
+
+            reset() {
+                this.lane = 0; this.targetX = 0;
+                this.mesh.position.set(0, 0, 0);
+                this.velocityY = 0;
+                this.isJumping = false; this.isDucking = false; this.isDead = false;
+                this.flashTimer = 0;
+                this.setShield(false);
+                this.mesh.visible = true;
+                this.mesh.rotation.x = 0;
+            }
+
+            update(delta, speed) {
+                if (this.isDead) return;
+
+                this.mesh.position.x = THREE.MathUtils.lerp(this.mesh.position.x, this.targetX, CONFIG.physics.laneSpeed * delta);
+                this.mesh.rotation.z = (this.mesh.position.x - this.targetX) * 0.15;
+
+                this.velocityY += CONFIG.physics.gravity * delta;
+                this.mesh.position.y += this.velocityY * delta;
+                if (this.mesh.position.y <= 0) {
+                    this.mesh.position.y = 0; this.velocityY = 0; this.isJumping = false;
+                }
+
+                this.runTime += delta * speed * 0.6;
+                this.animateBody(delta);
+
+                if (this.flashTimer > 0) {
+                    this.flashTimer -= delta;
+                    const useFlash = Math.floor(this.flashTimer * 10) % 2 === 0;
+                    this.overrideMaterial(useFlash ? this.matFlash : null);
                 } else {
-                    clearInterval(interval);
-                    document.getElementById('loading-layer').style.opacity = 0;
-                    setTimeout(() => {
-                        document.getElementById('loading-layer').style.display = 'none';
-                        resolve();
-                    }, 500);
+                    this.overrideMaterial(null);
                 }
-            }, 800);
-        });
-    }
 
-    resize() {
-        const con = document.getElementById('game-container');
-        const aspect = CONFIG.DESIGN_W / CONFIG.DESIGN_H;
-        let w = con.clientWidth;
-        let h = con.clientHeight;
-        
-        if (w / h > aspect) w = h * aspect;
-        else h = w / aspect;
-        
-        this.canvas.width = w;
-        this.canvas.height = h;
-        this.scale = w / CONFIG.DESIGN_W;
-        this.ctx.scale(this.scale, this.scale);
-        
-        if(this.bgStars.length === 0) this.initStars();
-    }
-
-    initStars() {
-        this.bgStars = [];
-        for(let i=0; i<120; i++) {
-            this.bgStars.push({
-                x: Math.random() * CONFIG.DESIGN_W,
-                y: Math.random() * CONFIG.DESIGN_H,
-                s: Math.random() * 2,
-                a: Math.random(),
-                speed: Math.random() * 0.2
-            });
-        }
-    }
-
-    initEvents() {
-        window.addEventListener('keydown', e => {
-            if(document.activeElement === document.getElementById('cheat-box')) return;
-            if (this.state !== 'PLAYING') return;
-            if (e.code === 'Space' || e.code === 'ArrowDown') this.actionShoot();
-            if (e.code === 'ArrowUp') this.actionBomb();
-        });
-        const bind = (id, fn) => {
-            const el = document.getElementById(id);
-            el.addEventListener('mousedown', (e) => { e.preventDefault(); fn(); });
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); fn(); });
-        };
-        bind('btn-shoot', () => this.state === 'PLAYING' && this.actionShoot());
-        bind('btn-bomb', () => this.state === 'PLAYING' && this.actionBomb());
-        this.canvas.addEventListener('mousedown', () => this.state === 'PLAYING' && this.actionShoot());
-        
-        // --- 新增：手动过关按钮监听 ---
-        document.getElementById('warp-btn').addEventListener('click', () => {
-            if(this.isGodMode && this.money >= this.target) {
-                this.checkEnd(); // 手动触发结算
+                if (this.shieldMesh.visible) {
+                    this.shieldMesh.rotation.y += delta;
+                    this.shieldMesh.position.y = this.torso.position.y;
+                }
             }
-        });
-    }
 
-    startLevel(lvl) {
-        this.level = lvl;
-        this.target = this.calcTarget(lvl);
-        this.time = CONFIG.TIME_LIMIT;
-        this.resetHook();
-        this.generateItems(lvl);
-        this.state = 'PLAYING';
-        this.updateUI();
-        this.saveData();
-    }
-
-    calcTarget(lvl) {
-        return (this.money || 0) + 800 + (lvl * 600);
-    }
-
-    generateItems(lvl) {
-        this.items = [];
-        const count = 10 + Math.min(lvl * 2, 15);
-        for(let i=0; i<count; i++) {
-            let key;
-            const r = Math.random();
-            if (lvl >= 3 && r < 0.08) key = 'BLACK_HOLE';
-            else if (lvl >= 2 && r < 0.15) key = 'UFO';
-            else if (lvl >= 2 && r < 0.20) key = 'VOYAGER';
-            else if (r < 0.25) key = 'BAG';
-            else if (r < 0.30) key = 'CRYSTAL';
-            else if (r < 0.45) key = 'JUPITER';
-            else if (r < 0.60) key = 'SATURN';
-            else if (r < 0.70) key = 'MINE';
-            else if (lvl >= 4 && r < 0.75) key = 'SUN';
-            else key = Math.random() > 0.5 ? 'ASTEROID_L' : 'ASTEROID_S';
-            if (lvl === 1 && ['BLACK_HOLE', 'SUN', 'MINE'].includes(key)) key = 'MARS';
-            const tmpl = CATALOG[key];
-            this.spawnItem(tmpl);
-        }
-    }
-
-    spawnItem(tmpl) {
-        for(let k=0; k<100; k++) {
-            const x = Math.random() * (CONFIG.DESIGN_W - 100) + 50;
-            const y = Math.random() * (CONFIG.DESIGN_H - 250) + 200;
-            let ok = true;
-            for(let it of this.items) {
-                const dist = Math.hypot(x - it.x, y - it.y);
-                if (dist < tmpl.radius + it.radius + 15) { ok = false; break; }
+            animateBody(delta) {
+                if (this.isJumping) {
+                    this.armL.rotation.x = -2.5; this.armR.rotation.x = -2.5;
+                    this.legL.rotation.x = -0.5; this.legR.rotation.x = -0.8;
+                } else if (this.isDucking) {
+                    this.torso.position.y = THREE.MathUtils.lerp(this.torso.position.y, 0.6, 15*delta);
+                    this.torso.rotation.x = -Math.PI / 2.2;
+                    this.armL.rotation.x = 0; this.armR.rotation.x = 0;
+                    this.legL.rotation.x = 0; this.legR.rotation.x = 0;
+                    if ((this.duckTimer -= delta) <= 0) this.isDucking = false;
+                } else {
+                    this.torso.position.y = THREE.MathUtils.lerp(this.torso.position.y, 1.5, 5*delta);
+                    this.torso.rotation.x = 0.2;
+                    const s = Math.sin(this.runTime);
+                    this.armL.rotation.x = s; this.armR.rotation.x = -s;
+                    this.legL.rotation.x = -s; this.legR.rotation.x = s;
+                }
             }
-            if(ok) {
-                const item = { 
-                    ...tmpl, x, y, 
-                    rot: Math.random()*6.28, 
-                    active: true,
-                    vx: tmpl.move ? (Math.random() > 0.5 ? tmpl.speed : -tmpl.speed) : 0
-                };
-                this.items.push(item);
-                break;
+
+            overrideMaterial(mat) {
+                this.torso.material = mat || this.matBody;
+                this.armL.material = mat || this.matBody;
+                this.armR.material = mat || this.matBody;
+                this.legL.material = mat || this.matBody;
+                this.legR.material = mat || this.matBody;
+            }
+
+            setShield(active) { this.shieldMesh.visible = active; }
+            takeDamage() { this.flashTimer = 1.0; }
+            changeLane(dir) { if(!this.isDead) { const next = this.lane + dir; if(next >= -1 && next <= 1) { this.lane = next; this.targetX = this.lane * CONFIG.laneWidth; } } }
+            jump() { if(!this.isJumping && !this.isDead) { this.isJumping = true; this.isDucking = false; this.velocityY = CONFIG.physics.jumpForce; } }
+            duck() { if(!this.isJumping && !this.isDead) { this.isDucking = true; this.duckTimer = 0.8; this.velocityY = -15; } }
+            
+            getHitbox() {
+                const h = this.isDucking ? 0.6 : 1.6;
+                const pos = this.mesh.position;
+                return new THREE.Box3().setFromCenterAndSize(
+                    new THREE.Vector3(pos.x, pos.y + h/2, pos.z),
+                    new THREE.Vector3(0.5, h, 0.5)
+                );
             }
         }
-    }
 
-    loop(ts) {
-        if(!this.lastT) this.lastT = ts;
-        const dt = (ts - this.lastT) / 1000;
-        this.lastT = ts;
-        if (this.state === 'PLAYING') this.update(dt);
-        this.draw();
-        requestAnimationFrame(this.loop);
-    }
+        // ==========================================
+        // 3. 地图管理器 (World) - 修复版
+        // ==========================================
+        class WorldManager {
+            constructor(scene) {
+                this.scene = scene;
+                this.groundChunks = [];
+                this.objects = []; 
+                
+                // --- 几何体缓存 (关键修复：补全障碍物几何体) ---
+                this.geoGround = new THREE.PlaneGeometry(12, CONFIG.chunkSize);
+                
+                // 修复：添加高墙和矮墙的几何体定义
+                this.geoObsHigh = new THREE.BoxGeometry(2.8, 3.0, 1.0);
+                this.geoObsLow = new THREE.BoxGeometry(2.8, 0.9, 0.5);
 
-    update(dt) {
-        // 无敌模式不减时间
-        if (!this.isGodMode) {
-            this.time -= dt;
-            if(this.time <= 0) { this.time = 0; this.checkEnd(); }
-        }
-        
-        const timeEl = document.getElementById('ui-time');
-        if (this.isGodMode) {
-            if (timeEl.innerText !== '∞') timeEl.innerText = '∞';
-        } else {
-            timeEl.innerText = Math.ceil(this.time);
-        }
+                this.geoCoin = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 8);
+                this.geoMagnet = new THREE.TorusGeometry(0.5, 0.15, 8, 16);
+                this.geoShield = new THREE.IcosahedronGeometry(0.6); 
 
-        const ox = CONFIG.DESIGN_W / 2;
-        const oy = CONFIG.HOOK_ORIGIN_Y;
+                // --- 材质缓存 ---
+                this.matGround = new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 });
+                // 给障碍物加一点自发光，防止太黑看不见
+                this.matObsHigh = new THREE.MeshStandardMaterial({ color: CONFIG.colors.obstacleHigh, emissive: 0x111111 });
+                this.matObsLow = new THREE.MeshStandardMaterial({ color: CONFIG.colors.obstacleLow, emissive: 0x330000 });
+                this.matCoin = new THREE.MeshPhongMaterial({ color: CONFIG.colors.coin, shininess: 100, emissive: 0x221100 });
+                this.matMagnet = new THREE.MeshPhongMaterial({ color: CONFIG.colors.magnet, emissive: 0x1111ff });
+                this.matShield = new THREE.MeshPhongMaterial({ color: CONFIG.colors.shield, emissive: 0x11ff11 });
 
-        if(this.hook.status === 0) {
-            this.hook.angle += CONFIG.SWING_SPEED * this.hook.dir;
-            if(Math.abs(this.hook.angle) > CONFIG.MAX_ANGLE) this.hook.dir *= -1;
-        } else if(this.hook.status === 1) {
-            this.hook.len += CONFIG.HOOK_SPEED_OUT;
-            const rad = this.hook.angle * Math.PI / 180;
-            this.hook.x = ox + Math.sin(rad) * this.hook.len;
-            this.hook.y = oy + Math.cos(rad) * this.hook.len;
-            if(this.hook.x<0 || this.hook.x>CONFIG.DESIGN_W || this.hook.y>CONFIG.DESIGN_H) {
-                this.hook.status = 2;
+                this.initGround();
             }
-            for(let it of this.items) {
-                if(!it.active) continue;
-                if(Math.hypot(this.hook.x - it.x, this.hook.y - it.y) < it.radius + 5) {
-                    if(it.type === 'mine') {
-                        this.explode(it);
-                        this.hook.status = 2;
-                    } else {
-                        this.hook.status = 2;
-                        this.hook.item = it;
-                        it.active = false;
+
+            initGround() {
+                this.geoGround.rotateX(-Math.PI/2);
+                this.geoCoin.rotateZ(Math.PI/2);
+                this.geoMagnet.rotateY(Math.PI/2);
+
+                for(let i=0; i<CONFIG.chunkCount; i++) {
+                    const chunk = new THREE.Mesh(this.geoGround, this.matGround);
+                    chunk.position.z = -i * CONFIG.chunkSize;
+                    chunk.receiveShadow = true;
+                    this.scene.add(chunk);
+                    this.groundChunks.push(chunk);
+                    // 前3块不生成障碍
+                    if(i > 3) this.spawnChunkContent(chunk.position.z);
+                }
+            }
+
+            reset() {
+                this.objects.forEach(o => this.scene.remove(o.mesh));
+                this.objects = [];
+                for(let i=0; i<CONFIG.chunkCount; i++) {
+                    this.groundChunks[i].position.z = -i * CONFIG.chunkSize;
+                    if(i>3) this.spawnChunkContent(this.groundChunks[i].position.z);
+                }
+            }
+
+            update(playerZ, magnetActive, playerPos) {
+                const firstChunk = this.groundChunks[0];
+                if (firstChunk.position.z > playerZ + CONFIG.chunkSize) {
+                    let minZ = 0;
+                    this.groundChunks.forEach(c => minZ = Math.min(minZ, c.position.z));
+                    firstChunk.position.z = minZ - CONFIG.chunkSize;
+                    this.groundChunks.push(this.groundChunks.shift());
+                    this.spawnChunkContent(firstChunk.position.z);
+                }
+
+                for (let i = this.objects.length - 1; i >= 0; i--) {
+                    const obj = this.objects[i];
+                    
+                    if (obj.mesh.position.z > playerZ + 20) {
+                        this.scene.remove(obj.mesh);
+                        this.objects.splice(i, 1);
+                        continue;
                     }
-                    break;
+
+                    if (obj.type === 'coin') {
+                        obj.mesh.rotation.x += 0.05;
+                        if (magnetActive) {
+                            if (obj.mesh.position.distanceTo(playerPos) < 18) {
+                                obj.mesh.position.lerp(playerPos, 0.2);
+                            }
+                        }
+                    } else if (obj.type === 'magnet' || obj.type === 'shield') {
+                        obj.mesh.rotation.y += 0.05;
+                        obj.mesh.position.y = 1 + Math.sin(Date.now()*0.005)*0.2;
+                    }
                 }
             }
-        } else if(this.hook.status === 2) {
-            let speed = CONFIG.HOOK_SPEED_IN;
-            if(this.hook.item) {
-                speed = Math.max(1, CONFIG.HOOK_SPEED_IN / (this.hook.item.weight * 0.3));
-            } else {
-                speed *= 2;
+
+            spawnChunkContent(zBase) {
+                const segments = [0, -CONFIG.chunkSize/3, -CONFIG.chunkSize*2/3];
+                
+                segments.forEach(offset => {
+                    const z = zBase + offset;
+                    const rand = Math.random();
+
+                    if (rand < 0.15) {
+                        this.spawnItem(z);
+                    } else if (rand < 0.5) {
+                        this.spawnCoinPattern(z);
+                    } else {
+                        // 确保障碍物生成
+                        this.spawnObstacles(z);
+                    }
+                });
             }
-            this.hook.len -= speed;
-            if(this.hook.len <= 40) {
-                this.hook.len = 40;
-                this.hook.status = 0;
-                if(this.hook.item) {
-                    this.collect(this.hook.item);
-                    this.hook.item = null;
+
+            spawnItem(z) {
+                const lane = Math.floor(Math.random()*3) - 1;
+                const type = Math.random() > 0.5 ? 'magnet' : 'shield';
+                const mesh = new THREE.Mesh(type === 'magnet' ? this.geoMagnet : this.geoShield, type === 'magnet' ? this.matMagnet : this.matShield);
+                mesh.position.set(lane * CONFIG.laneWidth, 1, z);
+                this.scene.add(mesh);
+                this.objects.push({ mesh, type, active: true, radius: 0.5 });
+            }
+
+            spawnCoinPattern(z) {
+                const pattern = Math.floor(Math.random() * 3);
+                const lane = Math.floor(Math.random()*3) - 1;
+                const x = lane * CONFIG.laneWidth;
+
+                if (pattern === 0) { // 5连
+                    for(let k=0; k<5; k++) this.createCoin(x, 1, z - k*2);
+                } else if (pattern === 1) { // 拱门
+                    this.createCoin(x, 1, z);
+                    this.createCoin(x, 2, z-2);
+                    this.createCoin(x, 2, z-4);
+                    this.createCoin(x, 1, z-6);
+                } else { // 横排
+                    this.createCoin(-CONFIG.laneWidth, 1, z);
+                    this.createCoin(0, 1, z);
+                    this.createCoin(CONFIG.laneWidth, 1, z);
                 }
             }
-            const rad = this.hook.angle * Math.PI / 180;
-            this.hook.x = ox + Math.sin(rad) * this.hook.len;
-            this.hook.y = oy + Math.cos(rad) * this.hook.len;
-        }
 
-        this.items.forEach(it => {
-            if(it.active && it.vx !== 0) {
-                it.x += it.vx;
-                if(it.x < it.radius || it.x > CONFIG.DESIGN_W - it.radius) it.vx *= -1;
+            createCoin(x, y, z) {
+                const mesh = new THREE.Mesh(this.geoCoin, this.matCoin);
+                mesh.position.set(x, y, z);
+                this.scene.add(mesh);
+                this.objects.push({ mesh, type: 'coin', active: true, radius: 0.5 });
             }
-            if(it === this.hook.item) {
-                it.x = this.hook.x;
-                it.y = this.hook.y + it.radius * 0.5;
+
+            spawnObstacles(z) {
+                const lanes = [-1, 0, 1].sort(()=>Math.random()-0.5);
+                const count = Math.random() > 0.6 ? 2 : 1; 
+                
+                for(let i=0; i<count; i++) {
+                    const lane = lanes[i];
+                    const isHigh = Math.random() > 0.5;
+                    
+                    // 确保使用已初始化的 Geometry
+                    const geo = isHigh ? this.geoObsHigh : this.geoObsLow;
+                    const mat = isHigh ? this.matObsHigh : this.matObsLow;
+                    
+                    const mesh = new THREE.Mesh(geo, mat);
+                    
+                    const h = isHigh ? 3.0 : 0.9;
+                    mesh.position.set(lane * CONFIG.laneWidth, h/2, z);
+                    mesh.castShadow = true;
+                    this.scene.add(mesh);
+                    
+                    this.objects.push({ 
+                        mesh, type: 'obstacle', subtype: isHigh?'high':'low', active: true,
+                        box: new THREE.Vector3(2.5, h, 1) // 碰撞盒稍微窄一点点，容错
+                    });
+                }
             }
-        });
 
-        for(let i=this.particles.length-1; i>=0; i--) {
-            const p = this.particles[i];
-            p.life--;
-            p.x += p.vx; p.y += p.vy;
-            if(p.life<=0) this.particles.splice(i,1);
-        }
-    }
+            checkCollisions(hero, callbacks) {
+                const heroBox = hero.getHitbox();
+                for (let i = 0; i < this.objects.length; i++) {
+                    const obj = this.objects[i];
+                    if (!obj.active) continue;
+                    if (Math.abs(obj.mesh.position.z - hero.mesh.position.z) > 3) continue;
 
-    actionShoot() {
-        if(this.hook.status === 0) this.hook.status = 1;
-    }
+                    let hit = false;
+                    if (obj.type === 'coin' || obj.type === 'magnet' || obj.type === 'shield') {
+                        if (obj.mesh.position.distanceTo(hero.mesh.position) < 1.5) hit = true;
+                    } else {
+                        const obsBox = new THREE.Box3().setFromCenterAndSize(obj.mesh.position, obj.box);
+                        if (heroBox.intersectsBox(obsBox)) hit = true;
+                    }
 
-    actionBomb() {
-        if(this.bombs > 0 && this.hook.item) {
-            this.bombs--;
-            this.createExplosion(this.hook.item.x, this.hook.item.y, 20, '#f00');
-            this.hook.item = null;
-            this.updateUI();
-        }
-    }
-
-    collect(item) {
-        let val = item.val;
-        let txt = `+${val}`;
-        let col = '#fff';
-        if(item.type === 'bag') {
-            const r = Math.random();
-            if(r < 0.4) { val = Math.floor(Math.random()*800)+200; txt=`$${val}`; col='#ffd700'; }
-            else if(r < 0.7) { this.bombs++; val=0; txt="鱼雷 +1"; col='#f00'; }
-            else { val=10; txt="太空垃圾"; col='#888'; }
-        }
-        if(val > 0) this.money += val;
-        this.showFloat(txt, CONFIG.DESIGN_W/2, 200, col);
-        this.updateUI();
-    }
-
-    explode(center) {
-        this.createExplosion(center.x, center.y, 50, '#ffaa00');
-        center.active = false;
-        this.items.forEach(it => {
-            if(it.active && Math.hypot(it.x - center.x, it.y - center.y) < 150) {
-                it.active = false;
-                this.createExplosion(it.x, it.y, 10, '#aaa');
+                    if (hit) callbacks.onHit(obj, i);
+                }
             }
-        });
-    }
-
-    draw() {
-        const ctx = this.ctx;
-        ctx.clearRect(0, 0, CONFIG.DESIGN_W, CONFIG.DESIGN_H);
-        this.bgStars.forEach(s => {
-            s.a += (Math.random()-0.5)*0.05;
-            if(s.a<0.2) s.a=0.2; if(s.a>1) s.a=1;
-            ctx.fillStyle = `rgba(255,255,255,${s.a})`;
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
-        });
-        this.drawPlayer(CONFIG.DESIGN_W/2, CONFIG.HOOK_ORIGIN_Y - 30);
-        const rad = this.hook.angle * Math.PI / 180;
-        let hx = this.hook.x, hy = this.hook.y;
-        if(this.hook.status === 0) {
-            hx = CONFIG.DESIGN_W/2 + Math.sin(rad) * 40;
-            hy = CONFIG.HOOK_ORIGIN_Y + Math.cos(rad) * 40;
         }
-        ctx.shadowBlur = 10; ctx.shadowColor = '#0ff';
-        ctx.strokeStyle = '#0ff'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(CONFIG.DESIGN_W/2, CONFIG.HOOK_ORIGIN_Y);
-        ctx.lineTo(hx, hy); ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.save();
-        ctx.translate(hx, hy);
-        ctx.rotate(rad);
-        ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#0ff'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(-6,-6); ctx.lineTo(-10,4); ctx.lineTo(-4,12); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(6,-6); ctx.lineTo(10,4); ctx.lineTo(4,12); ctx.stroke();
-        ctx.restore();
-        this.items.forEach(it => {
-            if(it.active || it === this.hook.item) this.drawItem(it);
-        });
-        this.particles.forEach(p => {
-            ctx.globalAlpha = p.life / 30;
-            ctx.fillStyle = p.col;
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, Math.PI*2); ctx.fill();
-        });
-        ctx.globalAlpha = 1;
-    }
 
-    drawPlayer(x, y) {
-        const ctx = this.ctx;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.fillStyle = '#222'; ctx.beginPath();
-        ctx.ellipse(0, 0, 35, 12, 0, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#0ff'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(0, -6, 12, 0, Math.PI*2); ctx.fill();
-        if(this.hook.status === 2) {
-            ctx.fillStyle = '#f50'; ctx.beginPath();
-            ctx.moveTo(-20, 5); ctx.lineTo(-25, 20+Math.random()*5); ctx.lineTo(-15, 5); ctx.fill();
-            ctx.moveTo(20, 5); ctx.lineTo(25, 20+Math.random()*5); ctx.lineTo(15, 5); ctx.fill();
-        }
-        ctx.restore();
-    }
-
-    drawItem(it) {
-        const ctx = this.ctx;
-        const r = it.radius;
-        ctx.save();
-        ctx.translate(it.x, it.y);
-        if(it !== this.hook.item && !it.move) ctx.rotate(it.rot); 
-        if(it.type === 'blackhole') {
-            const grd = ctx.createRadialGradient(0,0,r*0.2, 0,0,r);
-            grd.addColorStop(0, '#000'); grd.addColorStop(0.5, '#000'); grd.addColorStop(1, '#500050');
-            ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
-            ctx.strokeStyle = '#a0a'; ctx.lineWidth=2; ctx.stroke();
-            ctx.strokeStyle = 'rgba(255,0,255,0.5)';
-            ctx.beginPath(); ctx.ellipse(0, 0, r*1.6, r*0.4, -0.5, 0, Math.PI*2); ctx.stroke();
-        } else if(it.type === 'wormhole') {
-            ctx.fillStyle = '#309'; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
-            ctx.strokeStyle = '#fff'; ctx.setLineDash([5,5]); ctx.beginPath(); ctx.arc(0,0,r-5,0,Math.PI*2); ctx.stroke();
-            ctx.setLineDash([]);
-        } else if(it.type === 'ufo') {
-            ctx.fillStyle = '#888';
-            ctx.beginPath(); ctx.ellipse(0, 5, r, r*0.4, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#0f0';
-            ctx.beginPath(); ctx.arc(0, 0, r*0.5, 0, Math.PI, true); ctx.fill();
-            if(Math.floor(Date.now()/200)%2===0) {
-                ctx.fillStyle='red'; ctx.beginPath(); ctx.arc(-r*0.6, 5, 3, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(r*0.6, 5, 3, 0, Math.PI*2); ctx.fill();
+        // ==========================================
+        // 4. 特效 & 游戏主控
+        // ==========================================
+        class ScreenShaker {
+            constructor(camera) { this.camera = camera; this.shake = 0; }
+            trigger(val) { this.shake = val; }
+            update(delta) {
+                if(this.shake > 0) {
+                    this.camera.position.x += (Math.random()-0.5)*this.shake;
+                    this.camera.position.y += (Math.random()-0.5)*this.shake;
+                    this.shake = Math.max(0, this.shake - delta*2);
+                }
             }
-        } else if(it.type === 'ship') {
-            ctx.rotate(it.vx > 0 ? 0 : Math.PI);
-            ctx.fillStyle = '#ccc';
-            ctx.beginPath(); ctx.moveTo(r, 0); ctx.lineTo(-r, -r/2); ctx.lineTo(-r, r/2); ctx.fill();
-            ctx.fillStyle = '#0ff'; ctx.fillRect(-r, -3, 5, 6);
-        } else if(it.type === 'station') {
-            ctx.fillStyle = '#555'; ctx.fillRect(-r, -r/4, r*2, r/2);
-            ctx.fillStyle = '#aaa'; ctx.fillRect(-r/4, -r, r/2, r*2);
-            ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
-        } else if(it.type === 'planet' || it.type === 'star' || it.type === 'planet_land' || it.type === 'planet_band') {
-            const grd = ctx.createRadialGradient(-r*0.3,-r*0.3,0, 0,0,r);
-            grd.addColorStop(0, it.color[0]); grd.addColorStop(1, it.color[1]);
-            if(it.type === 'star') { ctx.shadowBlur = 30; ctx.shadowColor = it.color[0]; }
-            ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
-            ctx.shadowBlur = 0;
-            if(it.type === 'planet_land') {
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath(); ctx.arc(-5,-5, r*0.4, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(8,8, r*0.3, 0, Math.PI*2); ctx.fill();
-            }
-            if(it.type === 'planet_band') {
-                ctx.fillStyle = 'rgba(0,0,0,0.2)';
-                ctx.fillRect(-r, -5, r*2, 10);
-            }
-        } else if(it.type === 'saturn') {
-            const grd = ctx.createRadialGradient(0,0,0,0,0,r);
-            grd.addColorStop(0, it.color[0]); grd.addColorStop(1, it.color[1]);
-            ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
-            ctx.strokeStyle = 'rgba(200,200,200,0.6)'; ctx.lineWidth = 6;
-            ctx.beginPath(); ctx.ellipse(0,0,r*1.8, r*0.6, -0.3, 0, Math.PI*2); ctx.stroke();
-        } else if(it.type === 'rock') {
-            ctx.fillStyle = it.color[0];
-            ctx.beginPath();
-            for(let i=0; i<7; i++) {
-                const a = i/7 * Math.PI*2;
-                const d = r * (0.8 + Math.random()*0.3);
-                ctx.lineTo(Math.cos(a)*d, Math.sin(a)*d);
-            }
-            ctx.fill();
-        } else if(it.type === 'bag') {
-            ctx.fillStyle = '#808'; ctx.beginPath();
-            ctx.roundRect(-12, -15, 24, 30, 8); ctx.fill();
-            ctx.strokeStyle = '#f0f'; ctx.lineWidth=2; ctx.stroke();
-            ctx.fillStyle = '#fff'; ctx.font='bold 16px Arial'; 
-            ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('?',0,2);
-        } else if(it.type === 'mine') {
-            ctx.fillStyle = '#400'; ctx.beginPath(); ctx.arc(0,0,r*0.7,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#f00'; 
-            for(let i=0; i<8; i++) {
-                ctx.rotate(Math.PI/4); ctx.fillRect(r*0.6, -2, 6, 4);
-            }
-        } else if(it.type === 'crystal') {
-            ctx.fillStyle = '#0ff'; ctx.beginPath(); 
-            ctx.moveTo(0,-r); ctx.lineTo(r,0); ctx.lineTo(0,r); ctx.lineTo(-r,0); ctx.fill();
-            ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.moveTo(0,-r); ctx.lineTo(5,0); ctx.lineTo(0,r); ctx.fill();
         }
-        ctx.restore();
-        if(it.name && it !== this.hook.item && it.active) {
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.7)';
-            ctx.font = '12px "Microsoft YaHei"';
-            ctx.textAlign = 'center';
-            ctx.fillText(it.name, it.x, it.y + it.radius + 15);
-        }
-    }
 
-    createExplosion(x, y, n, col) {
-        for(let i=0; i<n; i++) {
-            this.particles.push({
-                x, y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
-                life: 30+Math.random()*20, sz: Math.random()*4+1, col: col
-            });
-        }
-    }
-
-    showFloat(text, x, y, col) {
-        const d = document.createElement('div');
-        d.className = 'float-text'; d.innerText = text;
-        d.style.color = col;
-        d.style.left = (this.canvas.offsetLeft + x*this.scale) + 'px';
-        d.style.top = (this.canvas.offsetTop + y*this.scale) + 'px';
-        document.body.appendChild(d);
-        setTimeout(()=>d.remove(), 1200);
-    }
-
-    checkEnd() {
-        this.state = 'MENU';
-        // 隐藏跳跃按钮
-        document.getElementById('warp-btn').style.display = 'none';
-
-        if(this.money >= this.target) {
-            this.showModal('任务完成', 
-                `状态：成功<br>能量：<span style="color:#ffd700">${this.money}</span> / ${this.target}`,
-                '下一星区', () => this.startLevel(this.level+1));
-        } else {
-            this.showModal('任务失败', 
-                `状态：能量不足<br>目标：${this.target}`,
-                '重启系统', () => this.resetGame());
-        }
-    }
-
-    showModal(title, content, btnText, callback) {
-        const overlay = document.getElementById('modal-overlay');
-        document.getElementById('modal-title').innerText = title;
-        document.getElementById('modal-content').innerHTML = content;
-        const btn = document.getElementById('modal-btn');
-        btn.innerText = btnText;
-        btn.onclick = () => {
-            overlay.style.display = 'none';
-            callback();
-        };
-        overlay.style.display = 'flex';
-    }
-
-    updateUI() {
-        document.getElementById('ui-money').innerText = this.money;
-        document.getElementById('ui-target').innerText = this.target;
-        document.getElementById('ui-level').innerText = this.level;
-        document.getElementById('ui-bomb').innerText = this.bombs;
-        
-        if(this.isGodMode) {
-            document.getElementById('ui-time').innerText = "∞";
-            // 检查是否达到目标以显示过关按钮
-            const warpBtn = document.getElementById('warp-btn');
-            if (this.money >= this.target) {
-                warpBtn.style.display = 'block';
-            } else {
-                warpBtn.style.display = 'none';
+        class ParticleSystem {
+            constructor(scene) { this.scene = scene; this.pool = []; }
+            spawn(pos, color, count=10) {
+                const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+                const mat = new THREE.MeshBasicMaterial({ color: color });
+                for(let i=0; i<count; i++) {
+                    const p = new THREE.Mesh(geo, mat);
+                    p.position.copy(pos);
+                    p.vel = new THREE.Vector3((Math.random()-0.5)*12, Math.random()*12, (Math.random()-0.5)*12);
+                    p.life = 1.0;
+                    this.scene.add(p);
+                    this.pool.push(p);
+                }
             }
-        } else {
-            document.getElementById('warp-btn').style.display = 'none';
+            update(delta) {
+                for(let i=this.pool.length-1; i>=0; i--) {
+                    const p = this.pool[i];
+                    p.position.addScaledVector(p.vel, delta);
+                    p.vel.y -= 30 * delta; 
+                    p.life -= delta;
+                    p.scale.setScalar(p.life);
+                    p.rotation.x += delta*5;
+                    if(p.life <= 0) { this.scene.remove(p); this.pool.splice(i, 1); }
+                }
+            }
         }
-    }
 
-    resetHook() {
-        this.hook.status = 0; this.hook.len = 40; this.hook.angle = 0; this.hook.item = null;
-    }
+        class Game {
+            constructor() {
+                this.initThree();
+                this.hero = new Hero(this.scene);
+                this.world = new WorldManager(this.scene);
+                this.particles = new ParticleSystem(this.scene);
+                this.shaker = new ScreenShaker(this.camera);
 
-    resetGame() {
-        localStorage.clear();
-        this.level=1; this.money=0; this.bombs=0;
-        this.startLevel(1);
-    }
+                this.state = 'MENU';
+                this.hp = 0; this.score = 0; this.highScore = localStorage.getItem('cyber_highscore') || 0;
+                this.speed = 0; this.magnetTimer = 0; this.hasShield = false;
+                
+                this.ui = {
+                    hp: document.getElementById('hp-value'),
+                    score: document.getElementById('score-value'),
+                    best: document.getElementById('best-score'),
+                    overlay: document.getElementById('overlay'),
+                    title: document.getElementById('title-text'),
+                    msg: document.getElementById('msg-text'),
+                    menuStart: document.getElementById('start-menu'),
+                    menuRestart: document.getElementById('restart-menu'),
+                    buffShield: document.getElementById('buff-shield'),
+                    buffMagnet: document.getElementById('buff-magnet')
+                };
+                this.ui.best.innerText = this.highScore;
+                this.setupInputs();
+                this.animate();
+            }
 
-    saveData() {
-        localStorage.setItem('cm_save', JSON.stringify({ l:this.level, m:this.money, b:this.bombs }));
-    }
-    loadSave() {
-        try {
-            const d = JSON.parse(localStorage.getItem('cm_save'));
-            if(d) { this.level=d.l; this.money=d.m; this.bombs=d.b||0; }
-        } catch(e){}
-    }
-}
+            initThree() {
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(CONFIG.colors.sky);
+                this.scene.fog = new THREE.Fog(CONFIG.colors.sky, 30, 90);
+                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+                this.camera.position.set(0, 5, 10);
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                document.getElementById('game-container').appendChild(this.renderer.domElement);
 
-window.onload = () => new Game();
-</script>
+                const ambi = new THREE.HemisphereLight(0xffffff, 0x000000, 0.6);
+                this.scene.add(ambi);
+                this.sun = new THREE.DirectionalLight(0xffffff, 1);
+                this.sun.position.set(10, 30, 10);
+                this.sun.castShadow = true;
+                this.sun.shadow.mapSize.set(2048, 2048);
+                this.sun.shadow.camera.top = 30; this.sun.shadow.camera.bottom = -30;
+                this.sun.shadow.camera.left = -30; this.sun.shadow.camera.right = 30;
+                this.scene.add(this.sun);
+                
+                window.addEventListener('resize', ()=> {
+                    this.camera.aspect = window.innerWidth/window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+
+            showMenu() {
+                this.state = 'MENU';
+                this.ui.overlay.classList.remove('hidden');
+                this.ui.title.innerText = "CYBER RUN";
+                this.ui.msg.innerText = "选择你的初始装甲强度";
+                this.ui.menuStart.classList.remove('hidden');
+                this.ui.menuRestart.classList.add('hidden');
+            }
+
+            start(hpMode) {
+                this.state = 'PLAYING';
+                this.lastHpMode = hpMode;
+                this.hp = hpMode;
+                this.score = 0;
+                this.speed = CONFIG.physics.speedBase;
+                this.magnetTimer = 0;
+                this.hasShield = false;
+                this.hero.reset();
+                this.world.reset();
+                this.updateUI();
+                this.ui.overlay.classList.add('hidden');
+                this.camera.position.set(0, 5, 10);
+            }
+
+            gameOver() {
+                this.state = 'GAMEOVER';
+                this.hero.isDead = true;
+                this.hero.mesh.rotation.x = -Math.PI/2;
+                this.hero.mesh.position.y = 0.5;
+                if (this.score > this.highScore) {
+                    this.highScore = Math.floor(this.score);
+                    localStorage.setItem('cyber_highscore', this.highScore);
+                    this.ui.best.innerText = this.highScore;
+                }
+                setTimeout(() => {
+                    this.ui.overlay.classList.remove('hidden');
+                    this.ui.title.innerText = "CRITICAL FAILURE";
+                    this.ui.msg.innerText = `最终得分: ${Math.floor(this.score)}`;
+                    this.ui.menuStart.classList.add('hidden');
+                    this.ui.menuRestart.classList.remove('hidden');
+                }, 1000);
+            }
+
+            update(delta) {
+                if (this.state !== 'PLAYING') return;
+
+                if (this.speed < CONFIG.physics.speedMax) this.speed += delta * 0.3;
+                const moveDist = this.speed * delta;
+                this.hero.mesh.position.z -= moveDist;
+
+                if (this.magnetTimer > 0) this.magnetTimer -= delta;
+
+                this.hero.update(delta, this.speed);
+                this.world.update(this.hero.mesh.position.z, this.magnetTimer > 0, this.hero.mesh.position);
+                this.particles.update(delta);
+                this.shaker.update(delta);
+
+                this.world.checkCollisions(this.hero, {
+                    onHit: (obj, index) => this.handleCollision(obj, index)
+                });
+
+                this.score += moveDist * 0.1;
+                this.updateUI();
+
+                const targetZ = this.hero.mesh.position.z + 10;
+                const targetX = this.hero.mesh.position.x * 0.5;
+                this.camera.position.z = targetZ;
+                this.camera.position.x += (targetX - this.camera.position.x) * 5 * delta;
+                
+                this.sun.position.z = this.hero.mesh.position.z + 20;
+                this.sun.target.position.z = this.hero.mesh.position.z;
+                this.sun.target.updateMatrixWorld();
+            }
+
+            handleCollision(obj, index) {
+                obj.active = false;
+                this.scene.remove(obj.mesh);
+
+                if (obj.type === 'coin') {
+                    this.score += 50;
+                    this.particles.spawn(obj.mesh.position, CONFIG.colors.coin, 5);
+                } 
+                else if (obj.type === 'magnet') {
+                    this.magnetTimer = 10;
+                    this.particles.spawn(obj.mesh.position, CONFIG.colors.magnet, 15);
+                } 
+                else if (obj.type === 'shield') {
+                    this.hasShield = true;
+                    this.hero.setShield(true);
+                    this.particles.spawn(obj.mesh.position, CONFIG.colors.shield, 15);
+                }
+                else if (obj.type === 'obstacle') {
+                    if (this.hasShield) {
+                        this.hasShield = false;
+                        this.hero.setShield(false);
+                        this.particles.spawn(obj.mesh.position, 0x88ccff, 20);
+                        this.shaker.trigger(0.3);
+                    } else {
+                        if (this.hp <= 9999) this.hp--;
+                        this.particles.spawn(obj.mesh.position, 0xff0000, 20);
+                        this.shaker.trigger(0.8);
+                        this.hero.takeDamage();
+                        if (this.hp <= 0) this.gameOver();
+                    }
+                }
+            }
+
+            updateUI() {
+                this.ui.score.innerText = Math.floor(this.score).toString().padStart(6, '0');
+                this.ui.hp.innerText = (this.hp > 9999) ? "INF" : this.hp;
+                this.ui.buffMagnet.style.display = this.magnetTimer > 0 ? 'block' : 'none';
+                this.ui.buffShield.style.display = this.hasShield ? 'block' : 'none';
+                if (this.magnetTimer > 0) this.ui.buffMagnet.innerText = `MAGNET ${Math.ceil(this.magnetTimer)}s`;
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                const delta = Math.min(this.clock.getDelta(), 0.1);
+                this.update(delta);
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            setupInputs() {
+                this.clock = new THREE.Clock();
+                const handleDir = (dir) => this.hero.changeLane(dir);
+                document.addEventListener('keydown', (e) => {
+                    if (this.state !== 'PLAYING') return;
+                    if (e.key === 'ArrowLeft' || e.key === 'a') handleDir(-1);
+                    if (e.key === 'ArrowRight' || e.key === 'd') handleDir(1);
+                    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') this.hero.jump();
+                    if (e.key === 'ArrowDown' || e.key === 's') this.hero.duck();
+                });
+                let sx=0, sy=0;
+                document.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; });
+                document.addEventListener('touchend', e => {
+                    if (this.state !== 'PLAYING') return;
+                    const dx = e.changedTouches[0].clientX - sx;
+                    const dy = e.changedTouches[0].clientY - sy;
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        if (Math.abs(dx) > 30) handleDir(dx > 0 ? 1 : -1);
+                    } else {
+                        if (Math.abs(dy) > 30) { dy < 0 ? this.hero.jump() : this.hero.duck(); }
+                    }
+                });
+            }
+        }
+
+        const gameInstance = new Game();
+    </script>
 </body>
 </html>

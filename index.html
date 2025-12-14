@@ -3,53 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cyber Runner: Final Fix</title>
+    <title>Cyber Runner: Neon Overdrive</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #0f172a; font-family: 'Segoe UI', sans-serif; user-select: none; }
+        /* CSS 背景改为明亮的渐变，防止加载时黑屏 */
+        body { margin: 0; overflow: hidden; background: linear-gradient(to bottom, #240046, #10002b); font-family: 'Segoe UI', sans-serif; user-select: none; }
         #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         
-        /* UI 界面样式 */
+        /* UI 界面样式 - 增强对比度 */
         .ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;
         }
         .top-bar {
             padding: 20px; display: flex; justify-content: space-between; align-items: flex-start;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            background: linear-gradient(to bottom, rgba(36, 0, 70, 0.9), transparent);
         }
-        .stat-group { color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        .label { font-size: 12px; color: #aaa; letter-spacing: 1px; font-weight: bold; }
-        .value { font-size: 32px; font-weight: 800; font-family: monospace; }
-        #hp-value { color: #ef4444; }
-        #score-value { color: #fbbf24; }
+        .stat-group { color: white; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .label { font-size: 12px; color: #d8b4fe; letter-spacing: 1px; font-weight: bold; text-transform: uppercase; }
+        .value { font-size: 32px; font-weight: 800; font-family: monospace; filter: drop-shadow(0 0 5px currentColor); }
+        #hp-value { color: #ff0055; }
+        #score-value { color: #00f2ff; }
         
         /* Buff 状态栏 */
-        #buff-bar {
-            display: flex; gap: 10px; margin-top: 10px;
-        }
+        #buff-bar { display: flex; gap: 10px; margin-top: 10px; }
         .buff {
-            background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px;
+            background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 4px;
             font-size: 14px; font-weight: bold; color: white; display: none;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            text-shadow: 0 0 5px currentColor;
         }
 
         /* 菜单遮罩 */
         #overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(16, 0, 43, 0.85); /* 半透明紫背景 */
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             z-index: 20; pointer-events: auto;
             transition: opacity 0.3s;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
         #overlay.hidden { opacity: 0; pointer-events: none; }
         
         h1 {
-            color: #34d399; font-size: 64px; margin: 0 0 10px 0;
+            color: #00f2ff; font-size: 64px; margin: 0 0 10px 0;
             text-transform: uppercase; font-style: italic;
-            text-shadow: 0 0 30px rgba(52, 211, 153, 0.4);
+            text-shadow: 0 0 40px rgba(0, 242, 255, 0.6), 4px 4px 0px #ff0055;
             letter-spacing: -2px;
         }
         
@@ -58,22 +58,27 @@
         }
         
         button {
-            background: linear-gradient(145deg, #1f2937, #111827);
-            border: 1px solid #374151;
+            background: linear-gradient(135deg, #3c096c, #240046);
+            border: 1px solid #7b2cbf;
             padding: 20px 30px; color: white;
-            font-size: 18px; font-weight: bold; border-radius: 12px;
+            font-size: 18px; font-weight: bold; border-radius: 8px;
             cursor: pointer; transition: all 0.2s;
-            min-width: 140px;
-            pointer-events: auto;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            min-width: 140px; pointer-events: auto;
+            box-shadow: 0 0 20px rgba(123, 44, 191, 0.3);
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
         }
-        button:hover { border-color: #34d399; color: #34d399; transform: translateY(-3px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        button:hover { 
+            border-color: #00f2ff; color: #00f2ff; 
+            transform: translateY(-5px); 
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+            background: #5a189a;
+        }
         button:active { transform: scale(0.98); }
         
-        button.god-mode { border-color: #f59e0b; color: #f59e0b; }
-        button.god-mode:hover { background: #f59e0b; color: #000; }
+        button.god-mode { border-color: #ff9e00; color: #ff9e00; }
+        button.god-mode:hover { background: #ff9e00; color: #000; text-shadow: none; }
 
-        .subtitle { color: #9ca3af; margin-bottom: 40px; font-size: 16px; max-width: 400px; text-align: center; line-height: 1.5; }
+        .subtitle { color: #e0aaff; margin-bottom: 40px; font-size: 16px; max-width: 400px; text-align: center; line-height: 1.5; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -83,35 +88,35 @@
     <div class="ui-layer">
         <div class="top-bar">
             <div class="stat-group">
-                <div class="label">ARMOR / HP</div>
+                <div class="label">ARMOR</div>
                 <div class="value" id="hp-value">100</div>
                 <div id="buff-bar">
-                    <div id="buff-shield" class="buff" style="color:#60a5fa; border-color:#60a5fa">SHIELD</div>
-                    <div id="buff-magnet" class="buff" style="color:#fbbf24; border-color:#fbbf24">MAGNET</div>
+                    <div id="buff-shield" class="buff" style="color:#00f2ff; border-color:#00f2ff">SHIELD</div>
+                    <div id="buff-magnet" class="buff" style="color:#ff9e00; border-color:#ff9e00">MAGNET</div>
                 </div>
             </div>
             <div class="stat-group" style="text-align: right;">
                 <div class="label">SCORE</div>
                 <div class="value" id="score-value">00000</div>
-                <div class="label" style="margin-top:5px; font-size:10px; opacity:0.7">BEST: <span id="best-score">0</span></div>
+                <div class="label" style="margin-top:5px; font-size:10px; opacity:0.8">BEST: <span id="best-score">0</span></div>
             </div>
         </div>
     </div>
 
     <div id="overlay">
         <h1 id="title-text">CYBER RUN</h1>
-        <div class="subtitle" id="msg-text">SYSTEM ONLINE<br>INITIALIZE ARMOR PROTOCOL</div>
+        <div class="subtitle" id="msg-text">NEON OVERDRIVE<br>SYSTEM READY</div>
         
         <div class="mode-select" id="start-menu">
-            <button onclick="startGame(100)">标准<br><span style="font-size:12px; color:#aaa; font-weight:normal">100 HP</span></button>
-            <button onclick="startGame(200)">强化<br><span style="font-size:12px; color:#aaa; font-weight:normal">200 HP</span></button>
-            <button onclick="startGame(1000)">重装<br><span style="font-size:12px; color:#aaa; font-weight:normal">1000 HP</span></button>
-            <button class="god-mode" onclick="startGame(999999)">GOD<br><span style="font-size:12px; font-weight:normal">DEV MODE</span></button>
+            <button onclick="startGame(100)">标准<br><span style="font-size:12px; opacity:0.7; font-weight:normal">100 HP</span></button>
+            <button onclick="startGame(200)">强化<br><span style="font-size:12px; opacity:0.7; font-weight:normal">200 HP</span></button>
+            <button onclick="startGame(1000)">重装<br><span style="font-size:12px; opacity:0.7; font-weight:normal">1000 HP</span></button>
+            <button class="god-mode" onclick="startGame(999999)">GOD<br><span style="font-size:12px; font-weight:normal">无敌模式</span></button>
         </div>
         
         <div class="mode-select hidden" id="restart-menu">
             <button onclick="showStartMenu()">主菜单</button>
-            <button onclick="restartLastMode()" style="border-color:#34d399; color:#34d399">再次尝试</button>
+            <button onclick="restartLastMode()" style="border-color:#00f2ff; color:#00f2ff; background:#1e1b4b">立即重试</button>
         </div>
     </div>
 
@@ -123,27 +128,34 @@
         import * as THREE from 'three';
 
         // ==========================================
-        // 1. 全局配置
+        // 1. 全局配置 (高亮配色版)
         // ==========================================
         const CONFIG = {
             laneWidth: 3.5,
             chunkSize: 40,
             chunkCount: 15,
-            fogStart: 30, // 增加雾效可视距离
-            fogEnd: 110,
+            fogStart: 40,
+            fogEnd: 120, // 增加可视距离
             colors: {
-                sky: 0x0f172a,
-                ground: 0x1e293b,
-                hero: 0xec4899,
-                obstacleLow: 0xdc2626,
-                obstacleHigh: 0x475569,
-                coin: 0xf59e0b,
-                magnet: 0x3b82f6,
-                shield: 0x10b981
+                // 核心改动：高饱和度紫/青配色
+                sky: 0x240046,      // 深紫罗兰背景
+                fog: 0x3c096c,      // 亮紫色雾气
+                ground: 0x10002b,   // 深紫色地面
+                grid: 0x00f2ff,     // 青色网格线
+                
+                hero: 0xff0055,     // 亮粉色主角
+                heroEmissive: 0x550022,
+                
+                obstacleHigh: 0xff3333, // 亮红高墙
+                obstacleLow: 0xff9900,  // 亮橙矮墙
+                
+                coin: 0xffd60a,     // 金黄硬币
+                magnet: 0x3a86ff,   // 亮蓝磁铁
+                shield: 0x00f2ff    // 青色护盾
             },
             physics: {
                 speedBase: 30,
-                speedMax: 70,
+                speedMax: 75,
                 jumpForce: 18,
                 gravity: -45,
                 laneSpeed: 15
@@ -155,7 +167,7 @@
         window.restartLastMode = () => gameInstance.start(gameInstance.lastHpMode);
 
         // ==========================================
-        // 2. 角色类 (Hero)
+        // 2. 角色类 (Hero) - 增加发光材质
         // ==========================================
         class Hero {
             constructor(scene) {
@@ -171,13 +183,20 @@
             }
 
             initModel() {
-                this.matBody = new THREE.MeshPhongMaterial({ color: CONFIG.colors.hero, flatShading: true });
+                // 材质升级：StandardMaterial + Emissive (自发光)
+                this.matBody = new THREE.MeshStandardMaterial({ 
+                    color: CONFIG.colors.hero, 
+                    roughness: 0.3, 
+                    metalness: 0.5,
+                    emissive: CONFIG.colors.heroEmissive,
+                    emissiveIntensity: 0.5
+                });
                 this.matFlash = new THREE.MeshBasicMaterial({ color: 0xffffff }); 
 
                 this.bodyGroup = new THREE.Group();
                 this.mesh.add(this.bodyGroup);
 
-                // 身体部件
+                // 身体构造
                 this.torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), this.matBody);
                 this.torso.position.y = 1.5;
                 this.torso.castShadow = true;
@@ -187,7 +206,8 @@
                 head.position.y = 0.9; head.castShadow = true;
                 this.torso.add(head);
 
-                const jetpack = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.3), new THREE.MeshPhongMaterial({color: 0x333333}));
+                // 喷气背包 (亮灰色)
+                const jetpack = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.3), new THREE.MeshStandardMaterial({color: 0x888888, roughness:0.2}));
                 jetpack.position.set(0, 0, 0.3);
                 this.torso.add(jetpack);
 
@@ -202,10 +222,10 @@
                 this.legL = mkLimb(-0.25, -0.5); this.legR = mkLimb(0.25, -0.5);
                 this.torso.add(this.armL, this.armR, this.legL, this.legR);
 
-                // 护盾视觉
+                // 护盾 (更亮)
                 this.shieldMesh = new THREE.Mesh(
-                    new THREE.SphereGeometry(1.3, 16, 16),
-                    new THREE.MeshBasicMaterial({ color: CONFIG.colors.shield, transparent: true, opacity: 0.2, wireframe: true })
+                    new THREE.SphereGeometry(1.3, 24, 24),
+                    new THREE.MeshBasicMaterial({ color: CONFIG.colors.shield, transparent: true, opacity: 0.3, wireframe: true })
                 );
                 this.shieldMesh.position.y = 1.5;
                 this.shieldMesh.visible = false;
@@ -226,23 +246,18 @@
             update(delta, speed) {
                 if (this.isDead) return;
 
-                // 左右移动插值
                 this.mesh.position.x = THREE.MathUtils.lerp(this.mesh.position.x, this.targetX, CONFIG.physics.laneSpeed * delta);
-                // 倾斜效果
                 this.mesh.rotation.z = (this.mesh.position.x - this.targetX) * 0.1;
 
-                // 跳跃物理
                 this.velocityY += CONFIG.physics.gravity * delta;
                 this.mesh.position.y += this.velocityY * delta;
                 if (this.mesh.position.y <= 0) {
                     this.mesh.position.y = 0; this.velocityY = 0; this.isJumping = false;
                 }
 
-                // 动画
                 this.runTime += delta * speed * 0.6;
                 this.animateBody(delta);
 
-                // 受伤闪烁
                 if (this.flashTimer > 0) {
                     this.flashTimer -= delta;
                     const useFlash = Math.floor(this.flashTimer * 10) % 2 === 0;
@@ -251,27 +266,23 @@
                     this.overrideMaterial(null);
                 }
 
-                // 护盾旋转
                 if (this.shieldMesh.visible) {
-                    this.shieldMesh.rotation.y += delta * 2;
+                    this.shieldMesh.rotation.y += delta * 3;
                     this.shieldMesh.position.y = this.torso.position.y;
                 }
             }
 
             animateBody(delta) {
                 if (this.isJumping) {
-                    // 跳跃姿态
                     this.armL.rotation.x = -2.5; this.armR.rotation.x = -2.5;
                     this.legL.rotation.x = -0.5; this.legR.rotation.x = -0.8;
                 } else if (this.isDucking) {
-                    // 下蹲姿态
                     this.torso.position.y = THREE.MathUtils.lerp(this.torso.position.y, 0.6, 15*delta);
                     this.torso.rotation.x = -Math.PI / 2.2;
                     this.armL.rotation.x = 0; this.armR.rotation.x = 0;
                     this.legL.rotation.x = 0; this.legR.rotation.x = 0;
                     if ((this.duckTimer -= delta) <= 0) this.isDucking = false;
                 } else {
-                    // 跑步姿态
                     this.torso.position.y = THREE.MathUtils.lerp(this.torso.position.y, 1.5, 5*delta);
                     this.torso.rotation.x = 0.2;
                     const s = Math.sin(this.runTime);
@@ -305,7 +316,7 @@
         }
 
         // ==========================================
-        // 3. 地图管理器 (World)
+        // 3. 地图管理器 (World) - 增加网格地面
         // ==========================================
         class WorldManager {
             constructor(scene) {
@@ -314,19 +325,36 @@
                 this.objects = []; 
                 
                 // 资源缓存
-                this.geoGround = new THREE.PlaneGeometry(12, CONFIG.chunkSize);
+                this.geoGround = new THREE.PlaneGeometry(30, CONFIG.chunkSize); // 地面更宽
                 this.geoObsHigh = new THREE.BoxGeometry(2.8, 3.0, 1.0);
                 this.geoObsLow = new THREE.BoxGeometry(2.8, 0.9, 0.5);
-                this.geoCoin = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 8);
+                this.geoCoin = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 16); // 更圆
                 this.geoMagnet = new THREE.TorusGeometry(0.5, 0.15, 8, 16);
                 this.geoShield = new THREE.IcosahedronGeometry(0.6); 
 
-                this.matGround = new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 });
-                this.matObsHigh = new THREE.MeshStandardMaterial({ color: CONFIG.colors.obstacleHigh, emissive: 0x111111 });
-                this.matObsLow = new THREE.MeshStandardMaterial({ color: CONFIG.colors.obstacleLow, emissive: 0x330000 });
-                this.matCoin = new THREE.MeshPhongMaterial({ color: CONFIG.colors.coin, shininess: 100, emissive: 0x221100 });
-                this.matMagnet = new THREE.MeshPhongMaterial({ color: CONFIG.colors.magnet, emissive: 0x1111ff });
-                this.matShield = new THREE.MeshPhongMaterial({ color: CONFIG.colors.shield, emissive: 0x11ff11 });
+                // 材质：全部增加 Emissive 确保高亮
+                this.matGround = new THREE.MeshPhongMaterial({ 
+                    color: CONFIG.colors.ground, 
+                    shininess: 50,
+                    specular: 0x444444
+                });
+                
+                this.matObsHigh = new THREE.MeshStandardMaterial({ 
+                    color: CONFIG.colors.obstacleHigh, 
+                    emissive: 0xaa0000, 
+                    emissiveIntensity: 0.4,
+                    roughness: 0.2 
+                });
+                this.matObsLow = new THREE.MeshStandardMaterial({ 
+                    color: CONFIG.colors.obstacleLow, 
+                    emissive: 0xaa5500, 
+                    emissiveIntensity: 0.4,
+                    roughness: 0.2 
+                });
+                
+                this.matCoin = new THREE.MeshPhongMaterial({ color: CONFIG.colors.coin, emissive: 0xaa8800, shininess: 100 });
+                this.matMagnet = new THREE.MeshPhongMaterial({ color: CONFIG.colors.magnet, emissive: 0x0044aa, shininess: 100 });
+                this.matShield = new THREE.MeshPhongMaterial({ color: CONFIG.colors.shield, emissive: 0x00aa99, shininess: 100 });
 
                 this.initGround();
             }
@@ -337,12 +365,26 @@
                 this.geoMagnet.rotateY(Math.PI/2);
 
                 for(let i=0; i<CONFIG.chunkCount; i++) {
-                    const chunk = new THREE.Mesh(this.geoGround, this.matGround);
-                    chunk.position.z = -i * CONFIG.chunkSize;
-                    chunk.receiveShadow = true;
-                    this.scene.add(chunk);
-                    this.groundChunks.push(chunk);
-                    if(i > 3) this.spawnChunkContent(chunk.position.z);
+                    const chunkGroup = new THREE.Group();
+                    
+                    // 地面实体
+                    const groundMesh = new THREE.Mesh(this.geoGround, this.matGround);
+                    groundMesh.receiveShadow = true;
+                    chunkGroup.add(groundMesh);
+
+                    // 视觉网格 (GridHelper) - 增加速度感
+                    // 创建一个与 Chunk 大小匹配的网格
+                    const grid = new THREE.GridHelper(30, 10, CONFIG.colors.grid, 0x331155);
+                    grid.position.y = 0.02; // 稍微浮起避免Z-fighting
+                    grid.position.z = 0;
+                    grid.scale.z = CONFIG.chunkSize / 30; // 拉伸以匹配
+                    chunkGroup.add(grid);
+
+                    chunkGroup.position.z = -i * CONFIG.chunkSize;
+                    this.scene.add(chunkGroup);
+                    this.groundChunks.push(chunkGroup);
+
+                    if(i > 3) this.spawnChunkContent(chunkGroup.position.z);
                 }
             }
 
@@ -356,18 +398,16 @@
             }
 
             update(playerZ, magnetActive, playerPos) {
-                // 地面循环逻辑
                 const firstChunk = this.groundChunks[0];
                 if (firstChunk.position.z > playerZ + CONFIG.chunkSize) {
-                    let minZ = Infinity; // 修正：使用 Infinity 确保找到最小值
+                    let minZ = Infinity;
                     this.groundChunks.forEach(c => minZ = Math.min(minZ, c.position.z));
                     
                     firstChunk.position.z = minZ - CONFIG.chunkSize;
-                    this.groundChunks.push(this.groundChunks.shift()); // 移动到数组末尾
+                    this.groundChunks.push(this.groundChunks.shift());
                     this.spawnChunkContent(firstChunk.position.z);
                 }
 
-                // 物体清理与动画
                 for (let i = this.objects.length - 1; i >= 0; i--) {
                     const obj = this.objects[i];
                     
@@ -379,7 +419,7 @@
 
                     if (obj.type === 'coin') {
                         obj.mesh.rotation.x += 0.05;
-                        if (magnetActive && obj.mesh.position.distanceTo(playerPos) < 18) {
+                        if (magnetActive && obj.mesh.position.distanceTo(playerPos) < 20) {
                             obj.mesh.position.lerp(playerPos, 0.25);
                         }
                     } else if (obj.type === 'magnet' || obj.type === 'shield') {
@@ -405,6 +445,9 @@
                 const type = Math.random() > 0.5 ? 'magnet' : 'shield';
                 const mesh = new THREE.Mesh(type === 'magnet' ? this.geoMagnet : this.geoShield, type === 'magnet' ? this.matMagnet : this.matShield);
                 mesh.position.set(lane * CONFIG.laneWidth, 1, z);
+                // 添加点光源让道具更亮
+                // const light = new THREE.PointLight(type === 'magnet' ? CONFIG.colors.magnet : CONFIG.colors.shield, 1, 5);
+                // mesh.add(light);
                 this.scene.add(mesh);
                 this.objects.push({ mesh, type, active: true });
             }
@@ -463,21 +506,14 @@
         }
 
         // ==========================================
-        // 4. 特效 & 游戏主控 (修复了 Shaker)
+        // 4. 特效 & 游戏主控
         // ==========================================
         class ScreenShaker {
-            constructor() { 
-                this.shake = 0; 
-                this.offset = new THREE.Vector3(); // 存储偏移量，而不是修改摄像机
-            }
+            constructor() { this.shake = 0; this.offset = new THREE.Vector3(); }
             trigger(val) { this.shake = val; }
             update(delta) {
                 if(this.shake > 0) {
-                    this.offset.set(
-                        (Math.random()-0.5) * this.shake,
-                        (Math.random()-0.5) * this.shake,
-                        0
-                    );
+                    this.offset.set((Math.random()-0.5) * this.shake, (Math.random()-0.5) * this.shake, 0);
                     this.shake = Math.max(0, this.shake - delta*2);
                 } else {
                     this.offset.set(0, 0, 0);
@@ -488,12 +524,12 @@
         class ParticleSystem {
             constructor(scene) { this.scene = scene; this.pool = []; }
             spawn(pos, color, count=10) {
-                const geo = new THREE.BoxGeometry(0.25, 0.25, 0.25);
+                const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
                 const mat = new THREE.MeshBasicMaterial({ color: color });
                 for(let i=0; i<count; i++) {
                     const p = new THREE.Mesh(geo, mat);
                     p.position.copy(pos);
-                    p.vel = new THREE.Vector3((Math.random()-0.5)*15, Math.random()*15, (Math.random()-0.5)*15);
+                    p.vel = new THREE.Vector3((Math.random()-0.5)*18, Math.random()*18, (Math.random()-0.5)*18);
                     p.life = 1.0;
                     this.scene.add(p);
                     this.pool.push(p);
@@ -518,7 +554,7 @@
                 this.hero = new Hero(this.scene);
                 this.world = new WorldManager(this.scene);
                 this.particles = new ParticleSystem(this.scene);
-                this.shaker = new ScreenShaker(); // 不再传递 camera
+                this.shaker = new ScreenShaker();
 
                 this.state = 'MENU';
                 this.hp = 0; this.score = 0; this.highScore = localStorage.getItem('cyber_highscore') || 0;
@@ -544,29 +580,40 @@
             initThree() {
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(CONFIG.colors.sky);
-                // 调整雾效范围，防止跑快了看不到远处
-                this.scene.fog = new THREE.Fog(CONFIG.colors.sky, CONFIG.fogStart, CONFIG.fogEnd);
+                // 雾效颜色匹配背景
+                this.scene.fog = new THREE.Fog(CONFIG.colors.fog, CONFIG.fogStart, CONFIG.fogEnd);
                 
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
-                // 初始位置
                 this.camera.position.set(0, 5, 10);
                 
-                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.shadowMap.enabled = true;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                // 开启物理光照修正
+                this.renderer.useLegacyLights = false; 
                 document.getElementById('game-container').appendChild(this.renderer.domElement);
 
-                const ambi = new THREE.HemisphereLight(0xffffff, 0x000000, 0.7);
+                // --- 高亮光照设置 ---
+                // 1. 强环境光，消除死黑
+                const ambi = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2); 
                 this.scene.add(ambi);
-                this.sun = new THREE.DirectionalLight(0xffffff, 1.2);
-                this.sun.position.set(20, 50, 20);
+
+                // 2. 主光源 (太阳)
+                this.sun = new THREE.DirectionalLight(0xffffff, 1.5);
+                this.sun.position.set(15, 40, 20);
                 this.sun.castShadow = true;
                 this.sun.shadow.mapSize.set(2048, 2048);
                 this.sun.shadow.camera.top = 50; this.sun.shadow.camera.bottom = -50;
                 this.sun.shadow.camera.left = -30; this.sun.shadow.camera.right = 30;
+                this.sun.shadow.bias = -0.001;
                 this.scene.add(this.sun);
                 
+                // 3. 补光 (从正面打光，让物体更亮)
+                const fillLight = new THREE.DirectionalLight(0xaaccff, 0.8);
+                fillLight.position.set(0, 10, 10);
+                this.scene.add(fillLight);
+
                 window.addEventListener('resize', ()=> {
                     this.camera.aspect = window.innerWidth/window.innerHeight;
                     this.camera.updateProjectionMatrix();
@@ -578,7 +625,7 @@
                 this.state = 'MENU';
                 this.ui.overlay.classList.remove('hidden');
                 this.ui.title.innerText = "CYBER RUN";
-                this.ui.msg.innerHTML = "SYSTEM ONLINE<br>INITIALIZE ARMOR PROTOCOL";
+                this.ui.msg.innerHTML = "NEON OVERDRIVE<br>SYSTEM READY";
                 this.ui.menuStart.classList.remove('hidden');
                 this.ui.menuRestart.classList.add('hidden');
             }
@@ -620,7 +667,6 @@
             update(delta) {
                 if (this.state !== 'PLAYING') return;
 
-                // 速度随时间增加
                 if (this.speed < CONFIG.physics.speedMax) this.speed += delta * 0.5;
                 const moveDist = this.speed * delta;
                 this.hero.mesh.position.z -= moveDist;
@@ -639,28 +685,16 @@
                 this.score += moveDist * 0.1;
                 this.updateUI();
 
-                // ==========================================
-                // 关键修复：摄像机逻辑
-                // ==========================================
-                // 1. 计算理想位置
+                // 摄像机逻辑 (带修正)
                 const targetZ = this.hero.mesh.position.z + 10;
                 const targetX = this.hero.mesh.position.x * 0.6;
                 const baseY = 5; 
 
-                // 2. 应用平滑移动 + 震动偏移 (绝对位置赋值，消除累积误差)
                 this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, targetX, 5 * delta) + this.shaker.offset.x;
                 this.camera.position.y = baseY + this.shaker.offset.y;
                 this.camera.position.z = targetZ;
-
-                // 3. 强制锁定视角中心 (防止视角漂移)
-                // 让摄像机始终看向前方地面上的一个点
-                this.camera.lookAt(
-                    this.camera.position.x * 0.5, // 稍微看向弯道内侧
-                    2, 
-                    this.camera.position.z - 20
-                );
+                this.camera.lookAt(this.camera.position.x * 0.5, 2, this.camera.position.z - 20);
                 
-                // 灯光跟随
                 this.sun.position.z = this.hero.mesh.position.z + 20;
                 this.sun.target.position.z = this.hero.mesh.position.z;
                 this.sun.target.updateMatrixWorld();
@@ -687,12 +721,12 @@
                     if (this.hasShield) {
                         this.hasShield = false;
                         this.hero.setShield(false);
-                        this.particles.spawn(obj.mesh.position, 0x88ccff, 20);
+                        this.particles.spawn(obj.mesh.position, 0x00f2ff, 20);
                         this.shaker.trigger(0.5);
                     } else {
                         if (this.hp <= 9999) this.hp--;
-                        this.particles.spawn(obj.mesh.position, 0xff0000, 20);
-                        this.shaker.trigger(1.2); // 撞击震动
+                        this.particles.spawn(obj.mesh.position, 0xff0055, 20);
+                        this.shaker.trigger(1.2);
                         this.hero.takeDamage();
                         if (this.hp <= 0) this.gameOver();
                     }
@@ -736,7 +770,6 @@
                         if (Math.abs(dy) > 30) { dy < 0 ? this.hero.jump() : this.hero.duck(); }
                     }
                 }, {passive: false});
-                // 防止移动端滚动
                 document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
             }
         }

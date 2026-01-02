@@ -13,17 +13,19 @@
             --text-accent: #ffd700;
         }
 
-        body {
+        html, body {
             margin: 0; padding: 0;
+            width: 100%; height: 100%;
             background-color: #050b14;
             overflow: hidden;
+            position: fixed;
             font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
             touch-action: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         #game-wrapper {
@@ -37,7 +39,7 @@
             overflow: hidden;
         }
 
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -128,6 +130,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .card:hover { background: rgba(0, 229, 255, 0.1); border-color: #fff; }
@@ -441,17 +444,28 @@ class Game {
     resize() {
         const r = document.getElementById('game-wrapper').getBoundingClientRect();
         this.cvs.width = r.width; this.cvs.height = r.height;
-        this.sx = r.width/CFG.W; this.sy = r.height/CFG.H;
     }
     input() {
         const h = (e) => {
             if(!this.run) return;
-            e.preventDefault();
+            if(e.cancelable && e.type !== 'mousedown') e.preventDefault();
+            
             const rect = this.cvs.getBoundingClientRect();
-            const cx = e.changedTouches?e.changedTouches[0].clientX:e.clientX;
-            const cy = e.changedTouches?e.changedTouches[0].clientY:e.clientY;
-            const x = (cx-rect.left)/this.sx;
-            const y = (cy-rect.top)/this.sy;
+            let cx, cy;
+            
+            if (e.touches && e.touches.length > 0) {
+                cx = e.touches[0].clientX;
+                cy = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                cx = e.changedTouches[0].clientX;
+                cy = e.changedTouches[0].clientY;
+            } else {
+                cx = e.clientX;
+                cy = e.clientY;
+            }
+
+            const x = (cx - rect.left) * (CFG.W / rect.width);
+            const y = (cy - rect.top) * (CFG.H / rect.height);
             
             for(let i=this.sparks.length-1; i>=0; i--) {
                 const s = this.sparks[i];
@@ -531,8 +545,13 @@ class Game {
     }
     
     draw() {
-        this.ctx.clearRect(0,0,CFG.W,CFG.H);
-        this.ctx.save(); this.ctx.scale(this.sx, this.sy);
+        const r = this.cvs.getBoundingClientRect();
+        this.ctx.clearRect(0,0,this.cvs.width, this.cvs.height);
+        this.ctx.save(); 
+        
+        const sx = this.cvs.width / CFG.W;
+        const sy = this.cvs.height / CFG.H;
+        this.ctx.scale(sx, sy);
         
         const bg = this.ctx.createLinearGradient(0,0,0,CFG.H);
         bg.addColorStop(0, '#021019'); bg.addColorStop(1, '#0a2533');

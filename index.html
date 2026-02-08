@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>战术核心 V7.1 - 横屏移动端优化版（全量）</title>
+  <title>宇宙宙长-三角洲特别联合行动</title>
   <style>
     :root{
       --blue:#4aa3ff; --red:#ff4a4a; --neutral:#9a9a9a;
       --primary:#00ffcc; --danger:#ff3333;
     }
-    body{margin:0;overflow:hidden;background:#111;font-family:Segoe UI,Arial,sans-serif;user-select:none;touch-action:none}
+    body{margin:0;overflow:hidden;background:#111;font-family:Segoe UI,Arial,sans-serif;user-select:none}
     #game-container{position:fixed;inset:0}
     #damage-overlay{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 0 0 rgba(255,0,0,0);transition:box-shadow .12s}
     #smoke-overlay{
@@ -33,12 +33,6 @@
       color:#fff;background:rgba(0,0,0,.55);padding:7px 12px;border:1px solid #7aa;
       border-radius:6px;pointer-events:none;font-size:14px;opacity:0;transition:opacity .18s;
       z-index:120;
-    }
-
-    #rotate-tip{
-      position:fixed;inset:0;display:none;z-index:200;
-      background:rgba(0,0,0,.85);color:#fff;align-items:center;justify-content:center;
-      text-align:center;font-size:18px;line-height:1.6;
     }
 
     #ui-layer{position:fixed;inset:0;pointer-events:none;color:#fff;text-shadow:0 0 6px #000}
@@ -79,11 +73,11 @@
     .pp-fill{height:100%;width:0%;background:#fff;transition:width .1s}
 
     #mini-map{
-      position:fixed; right:10px; top:10px; width:190px; height:190px;
+      position:fixed; right:14px; top:14px; width:220px; height:220px;
       border:2px solid rgba(255,255,255,.35);
       background:rgba(10,15,20,.65); border-radius:8px; pointer-events:none
     }
-    #kill-feed{position:fixed;right:10px;top:216px;display:flex;flex-direction:column;gap:6px}
+    #kill-feed{position:fixed;right:14px;top:246px;display:flex;flex-direction:column;gap:6px}
     .kill-msg{
       background:rgba(0,0,0,.55);padding:5px 10px;border-left:3px solid var(--primary);
       animation:fadeOut 3s forwards
@@ -101,46 +95,6 @@
     }
     .key{background:#444;padding:2px 7px;border-radius:4px;border-bottom:2px solid #222;font-family:monospace;font-weight:700}
     button{cursor:pointer;border:none;padding:13px 32px;font-size:22px;font-weight:900;background:var(--primary);color:#000}
-
-    /* --- Mobile UI --- */
-    #mobile-ui{
-      position:fixed;inset:0;pointer-events:none;display:none;
-      z-index:90;
-    }
-    #look-pad{
-      position:fixed;right:0;top:0;width:55%;height:100%;
-      pointer-events:auto;z-index:90;
-    }
-    #move-pad{
-      position:fixed;left:18px;bottom:90px;width:120px;height:120px;
-      pointer-events:auto;z-index:100;
-    }
-    #move-base,#move-stick{
-      position:absolute;border-radius:50%;
-      background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
-    }
-    #move-base{width:120px;height:120px;left:0;top:0;}
-    #move-stick{width:48px;height:48px;left:36px;top:36px;background:rgba(0,255,204,0.25);}
-
-    #m-btns{
-      position:fixed;right:12px;bottom:90px;display:flex;flex-direction:column;gap:8px;
-      pointer-events:auto;z-index:100;
-    }
-    .m-btn{
-      width:64px;height:64px;border-radius:50%;
-      background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.3);
-      color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;
-      text-shadow:0 0 6px #000;
-    }
-    .m-btn.small{width:54px;height:54px;font-size:11px;}
-    #m-bottom{
-      position:fixed;right:12px;bottom:12px;display:flex;gap:8px;pointer-events:auto;z-index:100;
-      flex-wrap:wrap;width:280px;justify-content:flex-end;
-    }
-
-    @media (orientation:portrait) {
-      #rotate-tip{display:flex;}
-    }
   </style>
 
   <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
@@ -159,7 +113,6 @@
   <div id="smoke-overlay"></div>
   <div id="hit-marker"></div>
   <div id="announce"></div>
-  <div id="rotate-tip">请将手机旋转为横屏<br>以获得最佳操作体验</div>
 
   <div id="ui-layer">
     <div class="hud-top">
@@ -204,43 +157,17 @@
     </div>
   </div>
 
-  <canvas id="mini-map" width="200" height="200"></canvas>
-
-  <div id="mobile-ui">
-    <div id="look-pad"></div>
-    <div id="move-pad">
-      <div id="move-base"></div>
-      <div id="move-stick"></div>
-    </div>
-    <div id="m-btns">
-      <div class="m-btn" id="btn-shoot">射击</div>
-      <div class="m-btn small" id="btn-aim">开镜</div>
-      <div class="m-btn small" id="btn-jump">跳跃</div>
-      <div class="m-btn small" id="btn-crouch">蹲/立</div>
-      <div class="m-btn small" id="btn-sprint">冲刺</div>
-      <div class="m-btn small" id="btn-reload">换弹</div>
-    </div>
-    <div id="m-bottom">
-      <div class="m-btn small" id="btn-frag">手雷</div>
-      <div class="m-btn small" id="btn-smoke">烟雾</div>
-      <div class="m-btn small" id="btn-molo">燃烧</div>
-      <div class="m-btn small" id="btn-use">救援</div>
-      <div class="m-btn small" id="btn-med">医疗</div>
-      <div class="m-btn small" id="btn-plate">护甲</div>
-      <div class="m-btn small" id="btn-uav">UAV</div>
-      <div class="m-btn small" id="btn-ping">标记</div>
-    </div>
-  </div>
+  <canvas id="mini-map" width="220" height="220"></canvas>
 
   <div id="menu-screen">
-    <h1>占点团竞 V7.1</h1>
+    <h1>宇宙宙长-三角洲</h1>
     <div class="controls">
       <div><span class="key">WASD</span> 移动，<span class="key">SPACE</span> 跳跃/攀爬，<span class="key">C</span> 下蹲，<span class="key">ALT</span> 战术慢走</div>
       <div><span class="key">SHIFT</span> 冲刺，<span class="key">CTRL</span> 滑铲，<span class="key">E</span> 救援倒地队友</div>
       <div><span class="key">左键</span> 射击，<span class="key">右键</span> 开镜，<span class="key">R</span> 换弹，<span class="key">B</span> 切换开火模式</div>
       <div><span class="key">F/G/V</span> 投掷（按住显示预瞄抛物线，松开投掷）</div>
       <div><span class="key">6</span> 医疗包，<span class="key">7</span> 护甲板，<span class="key">X</span> UAV扫描，<span class="key">Z</span> 标记点</div>
-      <div>移动端支持：摇杆移动 + 触控视角 + 按钮操作（横屏体验最佳）</div>
+      <div>特色：卡模脱困、重烟雾遮蔽+AI失明、救援系统、可捡装备、性能优化</div>
     </div>
     <button id="start-btn">开始行动</button>
   </div>
@@ -248,8 +175,6 @@
 <script type="module">
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-
-const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 const CFG = {
   mapSize: 320,
@@ -306,9 +231,7 @@ const CFG = {
     uiHz: 15,
     minimapHz: 10,
     shadowUpdateInterval: 22
-  },
-
-  touch: { look: 0.0018 }
+  }
 };
 
 let scene, camera, renderer, controls;
@@ -349,8 +272,8 @@ const pointNames = ['A','B','C','D'];
 const grenades = [];
 const smokeClouds = [];
 const fireZones = [];
-const lootDrops = [];
-let pingMarker = null;
+const lootDrops = [];   // {type,mesh,pos,life}
+let pingMarker = null;  // {mesh,pos,life}
 
 let fpGun, muzzleFlash;
 let audioCtx;
@@ -369,9 +292,6 @@ padding:8px 12px;background:rgba(0,0,0,.55);color:#fff;border:1px solid #888;bor
 font-size:14px;pointer-events:none;display:none;z-index:120;
 `;
 document.body.appendChild(reviveTip);
-
-const joy = {active:false, id:null, baseX:0, baseY:0, x:0, y:0, max:40};
-const look = {active:false, id:null, lastX:0, lastY:0};
 
 init();
 
@@ -408,7 +328,6 @@ function init(){
   createThrowPreview();
 
   bindEvents();
-  initMobileControls();
   updateHUD();
   animate();
 }
@@ -426,104 +345,6 @@ function onResize(){
   camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
-}
-
-function initMobileControls(){
-  if(!isMobile) return;
-  document.getElementById('mobile-ui').style.display = 'block';
-
-  const movePad = document.getElementById('move-pad');
-  const moveStick = document.getElementById('move-stick');
-  const lookPad = document.getElementById('look-pad');
-
-  const setStick = (dx,dy)=>{
-    const dist=Math.hypot(dx,dy);
-    const max=joy.max;
-    const k=dist>max?max/dist:1;
-    const nx=dx*k, ny=dy*k;
-    moveStick.style.left = `${36 + nx}px`;
-    moveStick.style.top  = `${36 + ny}px`;
-    joy.x = nx/max;
-    joy.y = ny/max;
-  };
-
-  movePad.addEventListener('touchstart', e=>{
-    const t = e.changedTouches[0];
-    joy.active = true; joy.id = t.identifier;
-    joy.baseX = t.clientX; joy.baseY = t.clientY;
-    setStick(0,0);
-    e.preventDefault();
-  }, {passive:false});
-
-  movePad.addEventListener('touchmove', e=>{
-    for(const t of e.changedTouches){
-      if(t.identifier!==joy.id) continue;
-      const dx = t.clientX - joy.baseX;
-      const dy = t.clientY - joy.baseY;
-      setStick(dx,dy);
-    }
-    e.preventDefault();
-  }, {passive:false});
-
-  movePad.addEventListener('touchend', e=>{
-    for(const t of e.changedTouches){
-      if(t.identifier!==joy.id) continue;
-      joy.active=false; joy.id=null;
-      joy.x=0; joy.y=0;
-      moveStick.style.left='36px';
-      moveStick.style.top='36px';
-    }
-    e.preventDefault();
-  }, {passive:false});
-
-  lookPad.addEventListener('touchstart', e=>{
-    const t = e.changedTouches[0];
-    look.active=true; look.id=t.identifier;
-    look.lastX=t.clientX; look.lastY=t.clientY;
-  }, {passive:true});
-
-  lookPad.addEventListener('touchmove', e=>{
-    for(const t of e.changedTouches){
-      if(t.identifier!==look.id) continue;
-      const dx = t.clientX - look.lastX;
-      const dy = t.clientY - look.lastY;
-      look.lastX = t.clientX; look.lastY = t.clientY;
-
-      // 正向：上滑抬头
-      camera.rotation.y -= dx * CFG.touch.look;
-      camera.rotation.x += dy * CFG.touch.look;
-      camera.rotation.x = Math.max(-Math.PI/2+0.05, Math.min(Math.PI/2-0.05, camera.rotation.x));
-    }
-  }, {passive:true});
-
-  lookPad.addEventListener('touchend', e=>{
-    for(const t of e.changedTouches){
-      if(t.identifier!==look.id) continue;
-      look.active=false; look.id=null;
-    }
-  }, {passive:true});
-
-  const btn = (id, onDown, onUp)=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    el.addEventListener('touchstart', e=>{onDown?.(); e.preventDefault();},{passive:false});
-    el.addEventListener('touchend', e=>{onUp?.(); e.preventDefault();},{passive:false});
-  };
-
-  btn('btn-shoot', ()=>{state.firing=true;}, ()=>{state.firing=false;});
-  btn('btn-aim', ()=>{state.isScoped=true;}, ()=>{state.isScoped=false;});
-  btn('btn-jump', ()=>{ if(state.canJump){velocity.y=CFG.player.jump; state.canJump=false;} else tryMantle(); });
-  btn('btn-crouch', ()=>{ setCrouch(!state.isCrouching); });
-  btn('btn-sprint', ()=>{state.isSprinting=true;}, ()=>{state.isSprinting=false;});
-  btn('btn-reload', ()=>{reload();});
-  btn('btn-frag', ()=>{ if(state.throwCD<=0 && playerActor?.inv.frag>0){state.throwAimType='frag';} }, ()=>{ if(state.throwAimType==='frag'){playerThrow('frag'); state.throwAimType=null;}});
-  btn('btn-smoke', ()=>{ if(state.throwCD<=0 && playerActor?.inv.smoke>0){state.throwAimType='smoke';} }, ()=>{ if(state.throwAimType==='smoke'){playerThrow('smoke'); state.throwAimType=null;}});
-  btn('btn-molo', ()=>{ if(state.throwCD<=0 && playerActor?.inv.molotov>0){state.throwAimType='molotov';} }, ()=>{ if(state.throwAimType==='molotov'){playerThrow('molotov'); state.throwAimType=null;}});
-  btn('btn-use', ()=>{move.eHold=true;}, ()=>{move.eHold=false; state.reviveProgress=0;});
-  btn('btn-med', ()=>{useMedkit();});
-  btn('btn-plate', ()=>{usePlate();});
-  btn('btn-uav', ()=>{useUAV();});
-  btn('btn-ping', ()=>{placePing();});
 }
 
 /* ---------- MAP ---------- */
@@ -659,7 +480,7 @@ function startMatch(){
   ensureAudio();
   resetMatch();
   spawnTeams();
-  if(!isMobile) controls.lock();
+  controls.lock();
   state.playing=true;
 }
 function resetMatch(){
@@ -738,11 +559,20 @@ function onKeyDown(e){
       announce(`开火模式：${state.fireMode==='auto'?'全自动':'半自动'}`);
       break;
 
-    case 'Digit6':useMedkit();break;
-    case 'Digit7':usePlate();break;
-    case 'KeyX':useUAV();break;
-    case 'KeyZ':placePing();break;
+    case 'Digit6':
+      useMedkit();
+      break;
+    case 'Digit7':
+      usePlate();
+      break;
+    case 'KeyX':
+      useUAV();
+      break;
+    case 'KeyZ':
+      placePing();
+      break;
 
+    // 按住预瞄，松开投掷
     case 'KeyF':
       if(state.playing && playerActor?.inv.frag>0 && state.throwCD<=0) state.throwAimType='frag';
       break;
@@ -770,7 +600,10 @@ function onKeyUp(e){
     case 'AltLeft':
     case 'AltRight':state.isTacticalWalk=false;break;
     case 'KeyC':setCrouch(false);break;
-    case 'KeyE':move.eHold=false; state.reviveProgress=0; break;
+    case 'KeyE':
+      move.eHold=false;
+      state.reviveProgress=0;
+      break;
 
     case 'KeyF':
       if(state.throwAimType==='frag'){ playerThrow('frag'); state.throwAimType=null; }
@@ -796,10 +629,10 @@ function onMouseUp(e){
   if(e.button===2) state.isScoped=false;
 }
 
-/* ---------- Features ---------- */
+/* ---------- Additional features ---------- */
 function tryStartSlide(){
   if(!state.playing || state.slideActive || state.isCrouching || state.respawning) return;
-  const moving = move.w || move.a || move.s || move.d || Math.abs(joy.x)>0.1 || Math.abs(joy.y)>0.1;
+  const moving = move.w || move.a || move.s || move.d;
   if(!moving || !state.isSprinting || state.stamina < 20) return;
 
   state.slideActive=true;
@@ -858,7 +691,7 @@ function announce(text){
   el._t=setTimeout(()=>el.style.opacity='0',1400);
 }
 
-/* ---------- Movement / collision ---------- */
+/* ---------- Move / collision / unstuck ---------- */
 function setCrouch(v){
   if(v){state.isCrouching=true;return;}
   if(canStand()) state.isCrouching=false;
@@ -898,6 +731,7 @@ function checkPlayerColAt(x,z,h){
   return false;
 }
 function checkPlayerCol(){ return checkPlayerColAt(camera.position.x,camera.position.z,playerHeight); }
+
 function resolvePlayerStuck(){
   for(let iter=0; iter<5; iter++){
     const r=CFG.player.r;
@@ -922,6 +756,7 @@ function resolvePlayerStuck(){
     else camera.position.z += (pushFront+eps);
   }
 
+  // emergency unstuck
   const base=camera.position.clone();
   for(let rr=1; rr<=8; rr++){
     for(let i=0;i<12;i++){
@@ -1201,6 +1036,7 @@ function updateThrowPreview(){
     p.addScaledVector(v,step);
     if(p.y<0.12){ p.y=0.12; pts.push(p.clone()); break; }
   }
+
   throwPreviewGeom.setFromPoints(pts);
   throwPreviewLine.visible=true;
 }
@@ -1350,7 +1186,7 @@ function updatePlayer(dt){
     }
   }
 
-  if(controls.isLocked || isMobile){
+  if(controls.isLocked){
     velocity.x-=velocity.x*10*dt;
     velocity.z-=velocity.z*10*dt;
     velocity.y-=CFG.player.gravity*dt;
@@ -1358,8 +1194,7 @@ function updatePlayer(dt){
     let sp=state.isCrouching?CFG.player.crouch:(state.isSprinting&&!state.isScoped?CFG.player.sprint:CFG.player.walk);
     if(state.isTacticalWalk) sp*=0.55;
 
-    const moving = move.w || move.a || move.s || move.d || Math.abs(joy.x)>0.1 || Math.abs(joy.y)>0.1;
-
+    const moving=(move.w||move.a||move.s||move.d);
     if(state.isSprinting && moving && !state.isCrouching){
       state.stamina=Math.max(0,state.stamina-24*dt);
       if(state.stamina<=0) state.isSprinting=false;
@@ -1371,14 +1206,8 @@ function updatePlayer(dt){
       sp*=factor;
     }
 
-    let zin=(move.w?1:0)-(move.s?1:0);
-    let xin=(move.d?1:0)-(move.a?1:0);
-
-    if(isMobile){
-      xin = THREE.MathUtils.clamp(xin + joy.x, -1, 1);
-      zin = THREE.MathUtils.clamp(zin - joy.y, -1, 1);
-    }
-
+    const zin=(move.w?1:0)-(move.s?1:0);
+    const xin=(move.d?1:0)-(move.a?1:0);
     velocity.z-=zin*sp*100*dt;
     velocity.x-=xin*sp*100*dt;
 
@@ -1402,12 +1231,14 @@ function updatePlayer(dt){
 function updateBots(dt){
   for(const b of actors){
     if(!b.alive || b.isPlayer) continue;
+
     if(b.downed){
       b.bleed-=dt;
       if(b.bleed<=0) forceKillBot(b);
       continue;
     }
 
+    // 蓝队AI尝试救援倒地蓝队
     if(b.team==='blue'){
       const mate = actors.find(a=>a.alive && a.team==='blue' && a.downed && !a.isPlayer);
       if(mate){
@@ -1443,6 +1274,7 @@ function updateBots(dt){
       b.lastYaw=b.model.rotation.y;
 
       steerMove(pos,tpos,CFG.bots.speed*CFG.bots.thinkInt);
+
       aiTryThrow(b,target);
 
       const d=pos.distanceTo(tpos);
@@ -1450,6 +1282,13 @@ function updateBots(dt){
         botShoot(b,tpos,target);
       }
     }
+
+    const parts=b.model.userData.parts;
+    const t=performance.now()*0.006;
+    parts.ll.rotation.x=Math.sin(t)*0.35;
+    parts.rl.rotation.x=-Math.sin(t)*0.35;
+    parts.la.rotation.x=-Math.sin(t)*0.2;
+    parts.ra.rotation.x=Math.sin(t)*0.2;
   }
 }
 
@@ -1474,6 +1313,7 @@ function chooseTargetForBot(bot){
   }
   return best;
 }
+
 function steerMove(pos,target,step){
   const to=target.clone().sub(pos); to.y=0;
   if(to.lengthSq()<.001) return false;
@@ -1498,6 +1338,7 @@ function botCollide(p){
   return false;
 }
 
+/* ---------- Revive ---------- */
 function updateRevive(dt){
   if(state.respawning){ reviveTip.style.display='none'; return; }
 
@@ -1533,6 +1374,7 @@ function updateRevive(dt){
   }
 }
 
+/* ---------- Points ---------- */
 function updatePoints(dt){
   for(const p of points){
     const inBlue=[], inRed=[];
@@ -1602,6 +1444,7 @@ function updatePointUI(){
   }
 }
 
+/* ---------- Damage / death ---------- */
 function applyDamage(actor,dmg,isHead=false,ownerId=null){
   const attacker=actors.find(a=>a.id===ownerId);
 
@@ -1622,7 +1465,9 @@ function applyDamage(actor,dmg,isHead=false,ownerId=null){
 
   if(actor.hp<=0) killActor(actor,ownerId,isHead);
 }
+
 function killActor(victim,ownerId,isHead){
+  // 蓝队AI先进入击倒态
   if(!victim.isPlayer && victim.team==='blue' && !victim.downed){
     victim.downed=true;
     victim.hp=1;
@@ -1650,11 +1495,12 @@ function killActor(victim,ownerId,isHead){
       state.uavCharges++;
       announce('连杀奖励：UAV +1');
     }
+
     spawnLootDrop(getActorPos(victim).clone());
   }
 
   if(victim.isPlayer){
-    if(!isMobile) controls.unlock();
+    controls.unlock();
     state.respawning=true;
     setTimeout(respawnPlayer,2300);
   }else{
@@ -1686,9 +1532,10 @@ function respawnPlayer(){
   state.respawning=false;
   camera.position.set(-20+Math.random()*12,CFG.player.standEye,-20+Math.random()*12);
   velocity.set(0,0,0);
-  if(!isMobile) controls.lock();
+  controls.lock();
 }
 
+/* ---------- Vision / visual ---------- */
 function isInSmoke(pos){
   for(const s of smokeClouds){
     const d=Math.hypot(pos.x-s.pos.x,pos.z-s.pos.z);
@@ -1743,6 +1590,7 @@ function updateSmokeVision(){
   document.getElementById('crosshair').style.opacity=(1-alpha*0.95).toFixed(2);
 }
 
+/* ---------- Minimap ---------- */
 function updateMinimap(){
   const c=document.getElementById('mini-map');
   const ctx=c.getContext('2d');
@@ -1755,6 +1603,7 @@ function updateMinimap(){
   ctx.strokeStyle='rgba(255,255,255,.25)';
   ctx.strokeRect(1,1,w-2,h-2);
 
+  // points
   for(const p of points){
     const m=toMap(p.pos.x,p.pos.z);
     ctx.fillStyle=p.owner==='blue'?'#4aa3ff':p.owner==='red'?'#ff4a4a':'#999';
@@ -1785,6 +1634,7 @@ function updateMinimap(){
     ctx.beginPath(); ctx.arc(m.x,m.y,7,0,Math.PI*2); ctx.stroke();
   }
 
+  // actors
   for(const a of actors){
     if(!a.alive || a.isPlayer) continue;
     const p=getActorPos(a), m=toMap(p.x,p.z);
@@ -1801,6 +1651,7 @@ function updateMinimap(){
         drawArrow(ctx,m.x,m.y,a.lastYaw||a.model.rotation.y,'#63b2ff');
       }
     }else{
+      // UAV开启时全显；不开UAV时仅近距离显示
       const dToPlayer = getActorPos(a).distanceTo(camera.position);
       if(state.uavTime>0 || dToPlayer<35){
         ctx.fillStyle='#ff6b6b';
@@ -1838,6 +1689,7 @@ function drawArrow(ctx,x,y,yaw,color){
   ctx.fillStyle=color; ctx.fill();
 }
 
+/* ---------- HUD ---------- */
 function updateHUD(){
   document.getElementById('my-kills').innerText=state.myKills;
   document.getElementById('health-fill').style.width=Math.max(0,state.hp)+'%';
@@ -1872,6 +1724,7 @@ function flashDamage(){
   setTimeout(()=>o.style.boxShadow='inset 0 0 0 0 rgba(255,0,0,0)',120);
 }
 
+/* ---------- misc ---------- */
 function getActorPos(a){ return a.isPlayer ? camera.position : a.model.position; }
 function getAimPos(a){ const p=getActorPos(a).clone(); p.y+=a.isPlayer?0.05:1.45; return p; }
 function getViewDir(){ const d=new THREE.Vector3(); camera.getWorldDirection(d); return d.normalize(); }
@@ -1891,7 +1744,7 @@ function aliveById(id){
 }
 function endMatch(title){
   state.playing=false;
-  if(!isMobile) controls.unlock();
+  controls.unlock();
   throwPreviewLine.visible=false;
   reviveTip.style.display='none';
   const m=document.getElementById('menu-screen');
@@ -1903,6 +1756,7 @@ function endMatch(title){
 }
 function rand(a,b){ return a+Math.random()*(b-a); }
 
+/* ---------- audio ---------- */
 function ensureAudio(){
   if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==='suspended') audioCtx.resume();

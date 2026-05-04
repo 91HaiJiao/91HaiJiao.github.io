@@ -9,24 +9,22 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#07070d;--bg2:#0e0e1a;--card:rgba(14,14,26,0.82);
-  --fg:#ece8df;--fg2:#a09882;--muted:#5e574a;
-  --accent:#d4a24c;--accent-l:#edc56e;--accent-d:rgba(212,162,76,0.12);
-  --border:rgba(212,162,76,0.18);--border-s:rgba(255,255,255,0.06);
-  --z:#f0a030;--z-d:rgba(240,160,48,.1);--e:#40d0a8;--e-d:rgba(64,208,168,.1);
-  --t:#e06080;--t-d:rgba(224,96,128,.1);--i:#e09060;--i-d:rgba(224,144,96,.1);
-  --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
-  --r:16px;--rs:10px;--rx:8px;
+--bg:#07070d;--bg2:#0e0e1a;--card:rgba(14,14,26,0.82);
+--fg:#ece8df;--fg2:#a09882;--muted:#5e574a;
+--accent:#d4a24c;--accent-l:#edc56e;--accent-d:rgba(212,162,76,0.12);
+--border:rgba(212,162,76,0.18);--border-s:rgba(255,255,255,0.06);
+--z:#f0a030;--z-d:rgba(240,160,48,.1);--e:#40d0a8;--e-d:rgba(64,208,168,.1);
+--t:#e06080;--t-d:rgba(224,96,128,.1);--i:#e09060;--i-d:rgba(224,144,96,.1);
+--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
+--r:16px;--rs:10px;--rx:8px;
 }
 html{-webkit-tap-highlight-color:transparent}
 body{
-  font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--fg);
-  height:100vh;height:100dvh;overflow:hidden;line-height:1.75;
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--fg);
+height:100vh;height:100dvh;overflow:hidden;line-height:1.75;
+-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
 h1,h2,h3,h4{font-family:'Noto Serif SC',serif;line-height:1.3}
-
-/* 星空 */
 canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;will-change:transform}
 .orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;will-change:transform;filter:blur(90px)}
 .orb-1{width:clamp(280px,50vw,500px);height:clamp(280px,50vw,500px);background:rgba(212,162,76,.07);top:-10%;right:-8%;animation:oF1 20s ease-in-out infinite}
@@ -35,200 +33,107 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 @keyframes oF1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,40px) scale(1.08)}}
 @keyframes oF2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}}
 @keyframes oF3{0%,100%{transform:translate(-50%,0) scale(1)}50%{transform:translate(-50%,30px) scale(1.06)}}
-
-/* ========== 页面核心：fixed定位，独立滚动 ========== */
 .page{
-  position:fixed;top:0;right:0;bottom:0;left:0;
-  overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  display:flex;justify-content:center;align-items:flex-start;
-  z-index:1;
-  padding:clamp(1rem,4vw,2rem);
-  padding-top:max(clamp(1rem,4vw,2rem),var(--safe-t));
-  padding-bottom:max(clamp(2rem,5vw,3rem),var(--safe-b));
-  opacity:0;visibility:hidden;transform:translateY(24px) scale(.98);
-  transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1),visibility 0s .65s;
-  pointer-events:none;
+position:fixed;top:0;right:0;bottom:0;left:0;
+overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+display:flex;justify-content:center;align-items:flex-start;
+z-index:1;padding:clamp(1rem,4vw,2rem);
+padding-top:max(clamp(1rem,4vw,2rem),var(--safe-t));
+padding-bottom:max(clamp(2rem,5vw,3rem),var(--safe-b));
+opacity:0;visibility:hidden;transform:translateY(24px) scale(.98);
+transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1),visibility 0s .65s;
+pointer-events:none;
 }
-.page.active{
-  opacity:1;visibility:visible;transform:translateY(0) scale(1);z-index:2;
-  transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1),visibility 0s 0s;
-  pointer-events:all;
-}
-.page.exit{
-  opacity:0;visibility:hidden;transform:translateY(-20px) scale(.98);z-index:1;
-  transition:opacity .45s cubic-bezier(.4,0,.2,1),transform .45s cubic-bezier(.4,0,.2,1),visibility 0s .45s;
-  pointer-events:none;
-}
-
-/* 安全垂直居中：内容短则居中，内容长则从顶部开始 */
+.page.active{opacity:1;visibility:visible;transform:translateY(0) scale(1);z-index:2;transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1),visibility 0s 0s;pointer-events:all}
+.page.exit{opacity:0;visibility:hidden;transform:translateY(-20px) scale(.98);z-index:1;transition:opacity .45s cubic-bezier(.4,0,.2,1),transform .45s cubic-bezier(.4,0,.2,1),visibility 0s .45s;pointer-events:none}
 .vc{margin-top:auto;margin-bottom:auto}
 .wrap{max-width:680px;width:100%}
-
-/* ========== 通用按钮 ========== */
 .btn-p{
-  display:inline-flex;align-items:center;gap:.6rem;
-  padding:.85rem 2.4rem;background:linear-gradient(145deg,var(--accent-l),var(--accent),#b87830);
-  color:#0a0a0f;border:none;border-radius:999px;font-size:clamp(.88rem,2vw,1rem);
-  font-weight:700;cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);
-  font-family:'Noto Sans SC',sans-serif;
-  box-shadow:0 4px 24px rgba(212,162,76,.2),inset 0 1px 0 rgba(255,255,255,.2);
-  position:relative;overflow:hidden;
+display:inline-flex;align-items:center;gap:.6rem;
+padding:.85rem 2.4rem;background:linear-gradient(145deg,var(--accent-l),var(--accent),#b87830);
+color:#0a0a0f;border:none;border-radius:999px;font-size:clamp(.88rem,2vw,1rem);
+font-weight:700;cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);
+font-family:'Noto Sans SC',sans-serif;
+box-shadow:0 4px 24px rgba(212,162,76,.2),inset 0 1px 0 rgba(255,255,255,.2);
+position:relative;overflow:hidden;
 }
 .btn-p::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent 60%);opacity:0;transition:opacity .35s}
 .btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(212,162,76,.3)}
 .btn-p:hover::after{opacity:1}
 .btn-p:active{transform:translateY(0) scale(.97)}
 .btn-s{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.7rem 1.8rem;background:transparent;color:var(--accent);
-  border:1px solid var(--border);border-radius:999px;font-size:clamp(.82rem,1.8vw,.9rem);
-  cursor:pointer;transition:all .35s;font-family:'Noto Sans SC',sans-serif;backdrop-filter:blur(8px);
+display:inline-flex;align-items:center;gap:.5rem;
+padding:.7rem 1.8rem;background:transparent;color:var(--accent);
+border:1px solid var(--border);border-radius:999px;font-size:clamp(.82rem,1.8vw,.9rem);
+cursor:pointer;transition:all .35s;font-family:'Noto Sans SC',sans-serif;backdrop-filter:blur(8px);
 }
 .btn-s:hover{background:var(--accent-d);border-color:var(--accent);transform:translateY(-1px)}
 .btn-s:active{transform:scale(.97)}
+.btn-s:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.btn-s:disabled:hover{background:transparent;border-color:var(--border)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-
-/* ========== 欢迎页 ========== */
-.w-badge{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.4rem 1.4rem;border:1px solid var(--border);border-radius:999px;
-  font-size:.72rem;letter-spacing:.35em;color:var(--accent);
-  background:var(--accent-d);backdrop-filter:blur(16px);animation:fadeUp .8s .2s both;
-}
-.w-title{
-  font-size:clamp(4rem,14vw,8rem);font-weight:900;letter-spacing:.06em;
-  background:linear-gradient(145deg,var(--accent-l) 0%,var(--accent) 40%,#b87830 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin:.2em 0 .1em;animation:fadeUp .8s .35s both;position:relative;
-}
-.w-title::after{
-  content:'';position:absolute;bottom:-.1em;left:50%;transform:translateX(-50%);
-  width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);
-  animation:lineGrow 1.2s .8s both;
-}
+.w-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1.4rem;border:1px solid var(--border);border-radius:999px;font-size:.72rem;letter-spacing:.35em;color:var(--accent);background:var(--accent-d);backdrop-filter:blur(16px);animation:fadeUp .8s .2s both}
+.w-title{font-size:clamp(4rem,14vw,8rem);font-weight:900;letter-spacing:.06em;background:linear-gradient(145deg,var(--accent-l) 0%,var(--accent) 40%,#b87830 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:.2em 0 .1em;animation:fadeUp .8s .35s both;position:relative}
+.w-title::after{content:'';position:absolute;bottom:-.1em;left:50%;transform:translateX(-50%);width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:lineGrow 1.2s .8s both}
 @keyframes lineGrow{from{width:0;opacity:0}to{width:60%;opacity:1}}
 .w-sub{font-family:'Noto Serif SC',serif;font-size:clamp(1rem,3vw,1.4rem);color:var(--fg2);font-weight:200;letter-spacing:.2em;animation:fadeUp .8s .5s both}
 .w-desc{max-width:520px;margin:1.5rem auto 0;color:var(--fg2);font-size:clamp(.85rem,2vw,.95rem);line-height:1.9;animation:fadeUp .8s .6s both}
-.dims{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.5rem,1.5vw,.8rem);
-  margin:2.2rem 0 2.5rem;animation:fadeUp .8s .7s both;
-}
-.dim-card{
-  padding:clamp(.8rem,2vw,1.2rem) .6rem;border-radius:var(--r);
-  background:var(--card);border:1px solid var(--border-s);backdrop-filter:blur(12px);
-  transition:transform .4s cubic-bezier(.4,0,.2,1),border-color .4s,box-shadow .4s;cursor:pointer;
-}
+.dims{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.5rem,1.5vw,.8rem);margin:2.2rem 0 2.5rem;animation:fadeUp .8s .7s both}
+.dim-card{padding:clamp(.8rem,2vw,1.2rem) .6rem;border-radius:var(--r);background:var(--card);border:1px solid var(--border-s);backdrop-filter:blur(12px);transition:transform .4s cubic-bezier(.4,0,.2,1),border-color .4s,box-shadow .4s;cursor:pointer}
 .dim-card:hover{transform:translateY(-4px);border-color:var(--border);box-shadow:0 8px 32px rgba(212,162,76,.08)}
 .dim-icon{font-size:clamp(1.1rem,2.5vw,1.4rem);margin-bottom:.4rem}
 .dim-label{font-size:clamp(.65rem,1.5vw,.75rem);color:var(--muted);margin-bottom:.2rem;letter-spacing:.08em}
 .dim-vals{font-family:'Noto Serif SC',serif;font-size:clamp(.9rem,2vw,1.05rem);font-weight:600;color:var(--fg)}
 .w-btn{animation:fadeUp .8s .85s both}
-
-/* ========== 维度介绍页 ========== */
 .intro-wrap{max-width:720px;width:100%;padding:clamp(1rem,3vw,2rem) 0}
 .intro-head{text-align:center;margin-bottom:clamp(2rem,6vw,3.5rem)}
-.intro-badge{
-  display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1.2rem;
-  border:1px solid var(--border);border-radius:999px;font-size:.7rem;
-  letter-spacing:.3em;color:var(--accent);background:var(--accent-d);
-  backdrop-filter:blur(16px);margin-bottom:1.5rem;
-}
-.intro-title{
-  font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;
-  background:linear-gradient(145deg,var(--accent-l),var(--accent));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem;
-}
+.intro-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1.2rem;border:1px solid var(--border);border-radius:999px;font-size:.7rem;letter-spacing:.3em;color:var(--accent);background:var(--accent-d);backdrop-filter:blur(16px);margin-bottom:1.5rem}
+.intro-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;background:linear-gradient(145deg,var(--accent-l),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem}
 .intro-subtitle{font-size:clamp(.9rem,2.2vw,1.1rem);color:var(--fg2);font-weight:300;letter-spacing:.1em}
-
-.dim-section{
-  margin-bottom:clamp(2rem,5vw,3rem);opacity:0;transform:translateY(30px);
-  transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1);
-}
+.dim-section{margin-bottom:clamp(2rem,5vw,3rem);opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
 .dim-section.vis{opacity:1;transform:translateY(0)}
 .dim-section-inner{border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--border-s);backdrop-filter:blur(12px)}
-.dim-header{
-  padding:clamp(1.2rem,3vw,1.8rem) clamp(1.2rem,3vw,2rem);
-  display:flex;align-items:center;gap:clamp(.8rem,2vw,1.2rem);border-bottom:1px solid var(--border-s);
-}
-.dim-header-icon{
-  width:clamp(48px,10vw,64px);height:clamp(48px,10vw,64px);border-radius:16px;
-  display:flex;align-items:center;justify-content:center;font-size:clamp(1.3rem,3vw,1.8rem);
-  flex-shrink:0;transition:transform .4s;
-}
+.dim-header{padding:clamp(1.2rem,3vw,1.8rem) clamp(1.2rem,3vw,2rem);display:flex;align-items:center;gap:clamp(.8rem,2vw,1.2rem);border-bottom:1px solid var(--border-s)}
+.dim-header-icon{width:clamp(48px,10vw,64px);height:clamp(48px,10vw,64px);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:clamp(1.3rem,3vw,1.8rem);flex-shrink:0;transition:transform .4s}
 .dim-section:hover .dim-header-icon{transform:scale(1.08) rotate(-3deg)}
 .dim-header-text h3{font-size:clamp(1.2rem,3vw,1.5rem);font-weight:700;margin-bottom:.15rem}
 .dim-header-text .dim-q{font-size:clamp(.82rem,1.8vw,.92rem);color:var(--fg2);font-weight:300;letter-spacing:.06em}
 .dim-body{padding:clamp(1.2rem,3vw,2rem) clamp(1.2rem,3vw,2rem)}
-.dim-body-intro{
-  font-size:clamp(.85rem,2vw,.93rem);color:var(--fg2);line-height:1.85;
-  margin-bottom:clamp(1.2rem,3vw,1.8rem);padding-bottom:clamp(1rem,2.5vw,1.5rem);border-bottom:1px dashed var(--border-s);
-}
+.dim-body-intro{font-size:clamp(.85rem,2vw,.93rem);color:var(--fg2);line-height:1.85;margin-bottom:clamp(1.2rem,3vw,1.8rem);padding-bottom:clamp(1rem,2.5vw,1.5rem);border-bottom:1px dashed var(--border-s)}
 .poles{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch}
 .pole{padding:clamp(1rem,2.5vw,1.5rem);border-radius:var(--r);transition:background .4s}
 .pole:hover{background:rgba(255,255,255,.02)}
-.pole-label{
-  display:inline-flex;align-items:center;gap:.5rem;font-family:'Noto Serif SC',serif;
-  font-size:clamp(1.3rem,3.5vw,1.8rem);font-weight:900;margin-bottom:.3rem;
-}
-.pole-tag{
-  font-family:'Noto Sans SC',sans-serif;font-size:.65rem;font-weight:500;
-  padding:.15rem .55rem;border-radius:999px;letter-spacing:.06em;vertical-align:middle;
-}
+.pole-label{display:inline-flex;align-items:center;gap:.5rem;font-family:'Noto Serif SC',serif;font-size:clamp(1.3rem,3.5vw,1.8rem);font-weight:900;margin-bottom:.3rem}
+.pole-tag{font-family:'Noto Sans SC',sans-serif;font-size:.65rem;font-weight:500;padding:.15rem .55rem;border-radius:999px;letter-spacing:.06em;vertical-align:middle}
 .pole-keyword{font-size:clamp(.78rem,1.6vw,.85rem);color:var(--fg2);margin-bottom:clamp(.8rem,2vw,1.2rem);font-weight:300;letter-spacing:.08em}
 .pole-desc{font-size:clamp(.82rem,1.8vw,.9rem);color:var(--fg2);line-height:1.9}
 .pole-desc li{list-style:none;padding-left:1.2em;position:relative;margin-bottom:.35em}
 .pole-desc li::before{content:'';position:absolute;left:0;top:.65em;width:6px;height:6px;border-radius:50%;background:var(--c)}
 .pole-divider{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 clamp(.5rem,1.5vw,.8rem);position:relative}
-.pole-divider::before{
-  content:'';position:absolute;top:10%;bottom:10%;width:1px;
-  background:linear-gradient(180deg,transparent,var(--border-s),var(--border),var(--border-s),transparent);
-}
-.pole-vs{
-  font-family:'Noto Serif SC',serif;font-size:.7rem;font-weight:700;color:var(--muted);
-  letter-spacing:.15em;background:var(--bg2);padding:.4em .6em;border-radius:999px;
-  border:1px solid var(--border-s);position:relative;z-index:1;
-}
+.pole-divider::before{content:'';position:absolute;top:10%;bottom:10%;width:1px;background:linear-gradient(180deg,transparent,var(--border-s),var(--border),var(--border-s),transparent)}
+.pole-vs{font-family:'Noto Serif SC',serif;font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.15em;background:var(--bg2);padding:.4em .6em;border-radius:999px;border:1px solid var(--border-s);position:relative;z-index:1}
 .dim-spectrum{height:4px;margin:0 clamp(1.2rem,3vw,2rem) clamp(1.2rem,3vw,1.5rem);border-radius:999px;overflow:hidden}
 .dim-spectrum-fill{height:100%;border-radius:999px}
-.intro-cta{
-  text-align:center;margin-top:clamp(1.5rem,4vw,2.5rem);padding-top:clamp(1.5rem,4vw,2rem);border-top:1px solid var(--border-s);
-}
+.intro-cta{text-align:center;margin-top:clamp(1.5rem,4vw,2.5rem);padding-top:clamp(1.5rem,4vw,2rem);border-top:1px solid var(--border-s)}
 .intro-cta p{color:var(--fg2);font-size:clamp(.85rem,2vw,.93rem);margin-bottom:1.2rem;line-height:1.8}
-
-/* ========== 测试页 ========== */
 .progress-wrap{display:flex;align-items:center;gap:.8rem;margin-bottom:2rem;padding:0 .2rem}
 .progress-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;position:relative}
-.progress-fill{
-  height:100%;border-radius:999px;width:0;background:linear-gradient(90deg,var(--accent-l),var(--accent));
-  transition:width .6s cubic-bezier(.4,0,.2,1);position:relative;
-}
-.progress-fill::after{
-  content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);
-  width:10px;height:10px;border-radius:50%;background:var(--accent-l);
-  box-shadow:0 0 12px var(--accent),0 0 24px rgba(212,162,76,.3);
-}
+.progress-fill{height:100%;border-radius:999px;width:0;background:linear-gradient(90deg,var(--accent-l),var(--accent));transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
+.progress-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--accent-l);box-shadow:0 0 12px var(--accent),0 0 24px rgba(212,162,76,.3)}
 .progress-num{font-size:.78rem;color:var(--fg2);white-space:nowrap;min-width:50px;text-align:right;font-variant-numeric:tabular-nums}
 .q-area{position:relative;min-height:280px}
 .q-num{font-size:.72rem;color:var(--accent);letter-spacing:.25em;margin-bottom:.8rem;font-weight:500}
 .q-text{font-family:'Noto Serif SC',serif;font-size:clamp(1.15rem,3.5vw,1.5rem);font-weight:600;line-height:1.65;margin-bottom:2rem}
 .q-opts{display:flex;flex-direction:column;gap:clamp(.6rem,1.5vw,.9rem)}
-.opt{
-  padding:clamp(.9rem,2.5vw,1.2rem) clamp(1rem,3vw,1.4rem);border-radius:var(--r);background:var(--card);
-  border:1px solid var(--border-s);cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);
-  text-align:left;font-size:clamp(.85rem,2.2vw,.95rem);line-height:1.65;color:var(--fg);
-  position:relative;overflow:hidden;backdrop-filter:blur(12px);display:flex;align-items:flex-start;gap:.8rem;
-  -webkit-user-select:none;user-select:none;
-}
+.opt{padding:clamp(.9rem,2.5vw,1.2rem) clamp(1rem,3vw,1.4rem);border-radius:var(--r);background:var(--card);border:1px solid var(--border-s);cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);text-align:left;font-size:clamp(.85rem,2.2vw,.95rem);line-height:1.65;color:var(--fg);position:relative;overflow:hidden;backdrop-filter:blur(12px);display:flex;align-items:flex-start;gap:.8rem;-webkit-user-select:none;user-select:none}
 .opt::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-d),transparent 70%);opacity:0;transition:opacity .4s}
 .opt:hover{border-color:var(--accent);transform:translateX(clamp(4px,1vw,8px));box-shadow:0 4px 20px rgba(212,162,76,.08)}
 .opt:hover::before{opacity:1}
 .opt:active{transform:scale(.975) translateX(clamp(4px,1vw,8px));transition-duration:.15s}
-.opt-lbl{
-  flex-shrink:0;width:28px;height:28px;line-height:28px;border-radius:var(--rx);
-  background:rgba(255,255,255,.05);text-align:center;font-size:.72rem;font-weight:700;
-  color:var(--accent);position:relative;z-index:1;transition:background .3s,color .3s;
-}
+.opt.selected{border-color:var(--accent);background:rgba(212,162,76,.08)}
+.opt.selected::before{opacity:1}
+.opt.selected .opt-lbl{background:var(--accent);color:#0a0a0f}
+.opt-lbl{flex-shrink:0;width:28px;height:28px;line-height:28px;border-radius:var(--rx);background:rgba(255,255,255,.05);text-align:center;font-size:.72rem;font-weight:700;color:var(--accent);position:relative;z-index:1;transition:background .3s,color .3s}
 .opt:hover .opt-lbl{background:var(--accent);color:#0a0a0f}
 .opt-txt{position:relative;z-index:1;padding-top:2px}
 .opt-ripple{position:absolute;border-radius:50%;background:rgba(212,162,76,.25);transform:scale(0);animation:ripOut .6s ease-out forwards;pointer-events:none;z-index:2}
@@ -237,27 +142,21 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .q-exit{animation:qOut .3s cubic-bezier(.4,0,.2,1) both}
 @keyframes qIn{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
 @keyframes qOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-50px)}}
-
-/* ========== 结果页 ========== */
+.q-nav{display:flex;gap:.8rem;justify-content:center;margin-top:2rem;align-items:center}
+.q-nav .btn-s{min-width:110px;justify-content:center}
+.q-nav .nav-info{font-size:.75rem;color:var(--muted);letter-spacing:.05em;min-width:60px;text-align:center}
 .r-header{padding-top:1rem;margin-bottom:1.5rem;text-align:center}
 .r-code{font-size:.78rem;letter-spacing:.5em;color:var(--accent);margin-bottom:.6rem;font-weight:500}
-.r-icon-wrap{
-  width:clamp(80px,20vw,110px);height:clamp(80px,20vw,110px);margin:0 auto 1.2rem;
-  display:flex;align-items:center;justify-content:center;border-radius:50%;
-  background:radial-gradient(circle,var(--accent-d) 0%,transparent 70%);border:1px solid var(--border);
-  color:var(--accent);font-size:clamp(2rem,5vw,2.8rem);position:relative;animation:iPulse 3s ease-in-out infinite;
-}
+.r-icon-wrap{width:clamp(80px,20vw,110px);height:clamp(80px,20vw,110px);margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;border-radius:50%;background:radial-gradient(circle,var(--accent-d) 0%,transparent 70%);border:1px solid var(--border);color:var(--accent);font-size:clamp(2rem,5vw,2.8rem);position:relative;animation:iPulse 3s ease-in-out infinite}
 .r-icon-wrap::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(212,162,76,.08);animation:iRing 3s ease-in-out infinite}
 @keyframes iPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,162,76,.15)}50%{box-shadow:0 0 40px 8px rgba(212,162,76,.1)}}
 @keyframes iRing{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.08);opacity:1}}
-.r-name{
-  font-size:clamp(2.5rem,8vw,4rem);font-weight:900;
-  background:linear-gradient(145deg,var(--accent-l),var(--accent));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.2em;
-}
+.r-name{font-size:clamp(2.5rem,8vw,4rem);font-weight:900;background:linear-gradient(145deg,var(--accent-l),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.2em}
 .r-en{font-size:clamp(.88rem,2.2vw,1.05rem);color:var(--fg2);font-weight:300;letter-spacing:.18em;margin-bottom:.8rem}
 .r-motto{font-family:'Noto Serif SC',serif;font-size:clamp(.92rem,2.2vw,1.05rem);color:var(--fg2);font-style:italic;font-weight:200;padding:0 1rem}
-.dim-bars{display:grid;gap:1.1rem;margin:2rem 0;text-align:left;max-width:520px;margin-left:auto;margin-right:auto}
+.radar-wrap{display:flex;justify-content:center;margin:2rem 0}
+.radar-wrap canvas{max-width:320px;max-height:320px;width:100%;height:auto}
+.dim-bars{display:grid;gap:1.1rem;margin:1.5rem 0 2rem;text-align:left;max-width:520px;margin-left:auto;margin-right:auto}
 .dim-item{display:flex;flex-direction:column;gap:.35rem}
 .dim-head{display:flex;justify-content:space-between;align-items:center;font-size:clamp(.78rem,1.8vw,.85rem)}
 .dim-head .ds{color:var(--fg2)}.dim-head .dr{color:var(--accent);font-weight:700}
@@ -265,344 +164,134 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .dim-fill{height:100%;border-radius:999px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1);position:relative}
 .dim-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:inherit;box-shadow:0 0 8px currentColor;opacity:0;transition:opacity .3s .8s}
 .dim-fill.animated::after{opacity:1}
-.r-section{
-  margin:1.8rem 0;padding:clamp(1.2rem,3vw,1.8rem);border-radius:var(--r);background:var(--card);
-  border:1px solid var(--border-s);text-align:left;backdrop-filter:blur(12px);
-  opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1);
-}
+.r-section{margin:1.8rem 0;padding:clamp(1.2rem,3vw,1.8rem);border-radius:var(--r);background:var(--card);border:1px solid var(--border-s);text-align:left;backdrop-filter:blur(12px);opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1)}
 .r-section.vis{opacity:1;transform:translateY(0)}
 .r-section h3{font-size:clamp(1rem,2.5vw,1.12rem);color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.55rem}
 .r-section h3 i{font-size:.9em;opacity:.8}
 .r-section p{color:var(--fg2);line-height:1.9;font-size:clamp(.85rem,2vw,.93rem)}
 .tags{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.3rem}
-.tag{
-  padding:.3rem .85rem;border-radius:999px;font-size:clamp(.72rem,1.6vw,.8rem);
-  border:1px solid var(--border);color:var(--fg2);background:var(--accent-d);transition:transform .3s,box-shadow .3s;
-}
+.tag{padding:.3rem .85rem;border-radius:999px;font-size:clamp(.72rem,1.6vw,.8rem);border:1px solid var(--border);color:var(--fg2);background:var(--accent-d);transition:transform .3s,box-shadow .3s}
 .tag:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(212,162,76,.1)}
 .tag.good{border-color:rgba(64,208,168,.25);color:#40d0a8;background:rgba(64,208,168,.06)}
 .tag.warn{border-color:rgba(224,96,128,.25);color:#e06080;background:rgba(224,96,128,.06)}
 .r-actions{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:2.2rem;padding-bottom:var(--safe-b)}
-.toast{
-  position:fixed;bottom:calc(1.5rem + var(--safe-b));left:50%;
-  transform:translateX(-50%) translateY(80px);padding:.7rem 1.6rem;border-radius:var(--rs);
-  background:var(--card);border:1px solid var(--border);color:var(--fg);font-size:.88rem;z-index:100;
-  transition:transform .45s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px);white-space:nowrap;
-  box-shadow:0 8px 32px rgba(0,0,0,.4);
-}
+.footer-line{position:fixed;bottom:0;left:0;right:0;z-index:10;text-align:center;padding:calc(.5rem + var(--safe-b)) .5rem .5rem;font-size:.68rem;color:var(--muted);letter-spacing:.06em;background:linear-gradient(transparent,var(--bg) 40%);pointer-events:none}
+.toast{position:fixed;bottom:calc(1.5rem + var(--safe-b));left:50%;transform:translateX(-50%) translateY(80px);padding:.7rem 1.6rem;border-radius:var(--rs);background:var(--card);border:1px solid var(--border);color:var(--fg);font-size:.88rem;z-index:100;transition:transform .45s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
-
-/* ========== 响应式 ========== */
-@media(max-width:640px){
-  .dims{grid-template-columns:repeat(2,1fr)}
-  .poles{grid-template-columns:1fr;gap:0}
-  .pole-divider{flex-direction:row;padding:clamp(.4rem,1.5vw,.6rem) 0}
-  .pole-divider::before{top:50%;left:10%;right:10%;bottom:auto;width:auto;height:1px;
-    background:linear-gradient(90deg,transparent,var(--border-s),var(--border),var(--border-s),transparent)}
-  .r-section{padding:1rem 1.1rem}
-  .r-actions{flex-direction:column;align-items:center}
-  .r-actions .btn-p,.r-actions .btn-s{width:100%;justify-content:center}
-}
-@media(max-width:380px){
-  .dims{grid-template-columns:1fr 1fr;gap:.5rem}
-  .dim-card{padding:.7rem .5rem}
-  .pole{padding:.8rem}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  canvas#sky{display:none}.orb{animation:none!important}
-}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--muted);border-radius:999px}
+@media(max-width:640px){.dims{grid-template-columns:repeat(2,1fr)}.poles{grid-template-columns:1fr;gap:0}.pole-divider{flex-direction:row;padding:clamp(.4rem,1.5vw,.6rem) 0}.pole-divider::before{top:50%;left:10%;right:10%;bottom:auto;width:auto;height:1px;background:linear-gradient(90deg,transparent,var(--border-s),var(--border),var(--border-s),transparent)}.r-section{padding:1rem 1.1rem}.r-actions{flex-direction:column;align-items:center}.r-actions .btn-p,.r-actions .btn-s{width:100%;justify-content:center}.q-nav{flex-wrap:wrap}}
+@media(max-width:380px){.dims{grid-template-columns:1fr 1fr;gap:.5rem}.dim-card{padding:.7rem .5rem}.pole{padding:.8rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}canvas#sky{display:none}.orb{animation:none!important}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:999px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 </style>
 </head>
 <body>
-
 <canvas id="sky" aria-hidden="true"></canvas>
 <div class="orb orb-1" aria-hidden="true"></div>
 <div class="orb orb-2" aria-hidden="true"></div>
 <div class="orb orb-3" aria-hidden="true"></div>
 
-<!-- ===== 欢迎页 ===== -->
 <section id="pgWelcome" class="page active" role="main" aria-label="欢迎">
-  <div class="wrap vc" style="text-align:center">
-    <div class="w-badge"><i class="fas fa-infinity" style="font-size:.65rem"></i> Personality Universe</div>
-    <h1 class="w-title">ZETI</h1>
-    <p class="w-sub">探索你的人格宇宙</p>
-    <p class="w-desc">ZETI 从四个核心维度解析你的思维模式与行为倾向，揭示你独一无二的灵魂图谱。20 道精选题目，约 3 分钟，开启一场向内探索的旅程。</p>
-    <div class="dims">
-      <div class="dim-card" onclick="goIntro()">
-        <div class="dim-icon" style="color:var(--z)"><i class="fas fa-sun"></i></div>
-        <div class="dim-label">能量方向</div>
-        <div class="dim-vals">曜 / 渊</div>
-      </div>
-      <div class="dim-card" onclick="goIntro()">
-        <div class="dim-icon" style="color:var(--e)"><i class="fas fa-eye"></i></div>
-        <div class="dim-label">感知方式</div>
-        <div class="dim-vals">砚 / 翼</div>
-      </div>
-      <div class="dim-card" onclick="goIntro()">
-        <div class="dim-icon" style="color:var(--t)"><i class="fas fa-scale-balanced"></i></div>
-        <div class="dim-label">决断依据</div>
-        <div class="dim-vals">铮 / 泉</div>
-      </div>
-      <div class="dim-card" onclick="goIntro()">
-        <div class="dim-icon" style="color:var(--i)"><i class="fas fa-mountain"></i></div>
-        <div class="dim-label">行动步调</div>
-        <div class="dim-vals">岳 / 溪</div>
-      </div>
-    </div>
-    <div class="w-btn">
-      <button class="btn-p" onclick="goIntro()" aria-label="了解维度体系"><i class="fas fa-compass"></i> 启程探索</button>
-    </div>
-  </div>
+<div class="wrap vc" style="text-align:center">
+<div class="w-badge"><i class="fas fa-infinity" style="font-size:.65rem"></i> Personality Universe</div>
+<h1 class="w-title">ZETI</h1>
+<p class="w-sub">探索你的人格宇宙</p>
+<p class="w-desc">ZETI 从四个核心维度解析你的思维模式与行为倾向，揭示你独一无二的灵魂图谱。20 道精选题目，约 3 分钟，开启一场向内探索的旅程。</p>
+<div class="dims">
+<div class="dim-card" onclick="goIntro()"><div class="dim-icon" style="color:var(--z)"><i class="fas fa-sun"></i></div><div class="dim-label">能量方向</div><div class="dim-vals">曜 / 渊</div></div>
+<div class="dim-card" onclick="goIntro()"><div class="dim-icon" style="color:var(--e)"><i class="fas fa-eye"></i></div><div class="dim-label">感知方式</div><div class="dim-vals">砚 / 翼</div></div>
+<div class="dim-card" onclick="goIntro()"><div class="dim-icon" style="color:var(--t)"><i class="fas fa-scale-balanced"></i></div><div class="dim-label">决断依据</div><div class="dim-vals">铮 / 泉</div></div>
+<div class="dim-card" onclick="goIntro()"><div class="dim-icon" style="color:var(--i)"><i class="fas fa-mountain"></i></div><div class="dim-label">行动步调</div><div class="dim-vals">岳 / 溪</div></div>
+</div>
+<div class="w-btn"><button class="btn-p" onclick="goIntro()" aria-label="了解维度体系"><i class="fas fa-compass"></i> 启程探索</button></div>
+</div>
 </section>
 
-<!-- ===== 维度介绍页 ===== -->
 <section id="pgIntro" class="page" role="main" aria-label="维度介绍">
-  <div class="intro-wrap">
-    <div class="intro-head">
-      <div class="intro-badge"><i class="fas fa-layer-group" style="font-size:.6rem"></i> Dimensions</div>
-      <h1 class="intro-title">四维光谱</h1>
-      <p class="intro-subtitle">每一个人格都是四种维度交织的独特色彩</p>
-    </div>
-
-    <!-- Z 曜/渊 -->
-    <div class="dim-section" data-dim="Z">
-      <div class="dim-section-inner">
-        <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--z-d);color:var(--z);border:1px solid rgba(240,160,48,.2)"><i class="fas fa-sun"></i></div>
-          <div class="dim-header-text"><h3 style="color:var(--z)">Z · 曜 / 渊</h3><div class="dim-q">你从何处获得能量？</div></div>
-        </div>
-        <div class="dim-body">
-          <p class="dim-body-intro">曜与渊描述的是你的能量流向——你是在人群中焕发活力，还是在独处时恢复元气？这并非简单的"外向"与"内向"之分，而是关于你灵魂的充电方式。</p>
-          <div class="poles">
-            <div class="pole">
-              <div class="pole-label" style="color:var(--z)">曜<span class="pole-tag" style="background:var(--z-d);color:var(--z);border:1px solid rgba(240,160,48,.2)">外烁</span></div>
-              <div class="pole-keyword">人群是你的充电站</div>
-              <ul class="pole-desc">
-                <li style="--c:var(--z)">你是一团向外的火焰，在与他人的互动中燃烧得最旺</li>
-                <li style="--c:var(--z)">每一次交谈、每一场聚会都在为你注入活力</li>
-                <li style="--c:var(--z)">你倾向于先行动再思考，在外部世界中找到方向</li>
-                <li style="--c:var(--z)">你表达想法时更习惯说出来，在对话中理清思路</li>
-                <li style="--c:var(--z)">你的能量流向：内 → 外，在输出中重新充能</li>
-              </ul>
-            </div>
-            <div class="pole-divider"><span class="pole-vs">VS</span></div>
-            <div class="pole">
-              <div class="pole-label" style="color:var(--z)">渊<span class="pole-tag" style="background:rgba(120,160,220,.1);color:#78a0dc;border:1px solid rgba(120,160,220,.2)">内蕴</span></div>
-              <div class="pole-keyword">安静是你的圣地</div>
-              <ul class="pole-desc">
-                <li style="--c:#78a0dc">你是一汪向内的深潭，在独处中积蓄最深沉的力量</li>
-                <li style="--c:#78a0dc">每一段沉默、每一次独处都在为你恢复元气</li>
-                <li style="--c:#78a0dc">你倾向于先思考再行动，在内在世界中找到答案</li>
-                <li style="--c:#78a0dc">你表达想法时更习惯写下来，在沉淀中厘清思路</li>
-                <li style="--c:#78a0dc">你的能量流向：外 → 内，在回收中重新充能</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#78a0dc,var(--z))"></div></div>
-      </div>
-    </div>
-
-    <!-- E 砚/翼 -->
-    <div class="dim-section" data-dim="E">
-      <div class="dim-section-inner">
-        <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--e-d);color:var(--e);border:1px solid rgba(64,208,168,.2)"><i class="fas fa-eye"></i></div>
-          <div class="dim-header-text"><h3 style="color:var(--e)">E · 砚 / 翼</h3><div class="dim-q">你如何感知这个世界？</div></div>
-        </div>
-        <div class="dim-body">
-          <p class="dim-body-intro">砚与翼描述的是你收集信息的方式——你信赖五感所及的具体实在，还是追随第六感所向的抽象可能？一方砚台研磨现实，一双翅膀飞向想象。</p>
-          <div class="poles">
-            <div class="pole">
-              <div class="pole-label" style="color:var(--e)">砚<span class="pole-tag" style="background:var(--e-d);color:var(--e);border:1px solid rgba(64,208,168,.2)">具象</span></div>
-              <div class="pole-keyword">目光落在眼前</div>
-              <ul class="pole-desc">
-                <li style="--c:var(--e)">你关注具体、实在、可触摸的事物</li>
-                <li style="--c:var(--e)">你信赖经验：那些被验证过的、有据可查的方法</li>
-                <li style="--c:var(--e)">你是细节的收藏家，在微小的线索中发现真相</li>
-                <li style="--c:var(--e)">你关注"是什么"，追求精确和准确</li>
-                <li style="--c:var(--e)">你像一方砚台，脚踏实地研磨出墨色</li>
-              </ul>
-            </div>
-            <div class="pole-divider"><span class="pole-vs">VS</span></div>
-            <div class="pole">
-              <div class="pole-label" style="color:var(--e)">翼<span class="pole-tag" style="background:rgba(160,120,220,.1);color:#a078dc;border:1px solid rgba(160,120,220,.2)">抽象</span></div>
-              <div class="pole-keyword">目光投向远方</div>
-              <ul class="pole-desc">
-                <li style="--c:#a078dc">你关注潜在、可能、尚未实现的图景</li>
-                <li style="--c:#a078dc">你信赖直觉：那些灵感涌现的、冥冥中的指引</li>
-                <li style="--c:#a078dc">你是模式的发现者，在看似无关的事物间建立联系</li>
-                <li style="--c:#a078dc">你关注"可能是什么"，追求创新和突破</li>
-                <li style="--c:#a078dc">你像一双翅膀，在想象的天空中自由翱翔</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#a078dc,var(--e))"></div></div>
-      </div>
-    </div>
-
-    <!-- T 铮/泉 -->
-    <div class="dim-section" data-dim="T">
-      <div class="dim-section-inner">
-        <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--t-d);color:var(--t);border:1px solid rgba(224,96,128,.2)"><i class="fas fa-scale-balanced"></i></div>
-          <div class="dim-header-text"><h3 style="color:var(--t)">T · 铮 / 泉</h3><div class="dim-q">你如何做出决断？</div></div>
-        </div>
-        <div class="dim-body">
-          <p class="dim-body-intro">铮与泉描述的是你评判与抉择的依据——你以逻辑为尺丈量对错，还是以共情为秤衡量轻重？铮铮铁骨不偏不倚，清泉流淌绕石而行。</p>
-          <div class="poles">
-            <div class="pole">
-              <div class="pole-label" style="color:var(--t)">铮<span class="pole-tag" style="background:var(--t-d);color:var(--t);border:1px solid rgba(224,96,128,.2)">理性</span></div>
-              <div class="pole-keyword">心中有一杆秤</div>
-              <ul class="pole-desc">
-                <li style="--c:var(--t)">你衡量的是逻辑与事实，追求客观真相</li>
-                <li style="--c:var(--t)">你剥离情感因素，找到最合理的答案</li>
-                <li style="--c:var(--t)">你重视效率与公平——对就是对，错就是错</li>
-                <li style="--c:var(--t)">你在批评中看到关怀，在直率中表达尊重</li>
-                <li style="--c:var(--t)">你像铮铮铁骨，在风浪中不偏不倚</li>
-              </ul>
-            </div>
-            <div class="pole-divider"><span class="pole-vs">VS</span></div>
-            <div class="pole">
-              <div class="pole-label" style="color:var(--t)">泉<span class="pole-tag" style="background:rgba(80,160,220,.1);color:#50a0dc;border:1px solid rgba(80,160,220,.2)">共情</span></div>
-              <div class="pole-keyword">心中有一眼泉</div>
-              <ul class="pole-desc">
-                <li style="--c:#50a0dc">你涌动的是关怀与价值，追求和谐共处</li>
-                <li style="--c:#50a0dc">你考虑每个人的感受，找到最温暖的答案</li>
-                <li style="--c:#50a0dc">你重视善意与包容——人比规则更重要</li>
-                <li style="--c:#50a0dc">你在鼓励中激发潜能，在温柔中传递力量</li>
-                <li style="--c:#50a0dc">你像清泉流淌，在石间绕行却不失方向</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#50a0dc,var(--t))"></div></div>
-      </div>
-    </div>
-
-    <!-- I 岳/溪 -->
-    <div class="dim-section" data-dim="I">
-      <div class="dim-section-inner">
-        <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--i-d);color:var(--i);border:1px solid rgba(224,144,96,.2)"><i class="fas fa-mountain"></i></div>
-          <div class="dim-header-text"><h3 style="color:var(--i)">I · 岳 / 溪</h3><div class="dim-q">你如何规划与行动？</div></div>
-        </div>
-        <div class="dim-body">
-          <p class="dim-body-intro">岳与溪描述的是你面对世界的步调——你如山岳般沉稳有序，还是如溪流般灵活随势？山岳不移定义方向，溪水不争终达大海。</p>
-          <div class="poles">
-            <div class="pole">
-              <div class="pole-label" style="color:var(--i)">岳<span class="pole-tag" style="background:var(--i-d);color:var(--i);border:1px solid rgba(224,144,96,.2)">定序</span></div>
-              <div class="pole-keyword">如山岳般稳重</div>
-              <ul class="pole-desc">
-                <li style="--c:var(--i)">你每一步都踏在预定的路径上</li>
-                <li style="--c:var(--i)">你偏好计划：提前安排，按部就班，有始有终</li>
-                <li style="--c:var(--i)">你追求闭环——清单上的勾选让你满足</li>
-                <li style="--c:var(--i)">你在秩序中找到自由，在框架中释放创造力</li>
-                <li style="--c:var(--i)">你像巍峨山岳，不移动却定义了方向</li>
-              </ul>
-            </div>
-            <div class="pole-divider"><span class="pole-vs">VS</span></div>
-            <div class="pole">
-              <div class="pole-label" style="color:var(--i)">溪<span class="pole-tag" style="background:rgba(100,180,160,.1);color:#64b4a0;border:1px solid rgba(100,180,160,.2)">流变</span></div>
-              <div class="pole-keyword">如溪流般灵动</div>
-              <ul class="pole-desc">
-                <li style="--c:#64b4a0">你每一程都顺应地形而变化</li>
-                <li style="--c:#64b4a0">你偏好灵活：即兴发挥，随遇而安，拥抱变化</li>
-                <li style="--c:#64b4a0">你追求开放——意外的惊喜让你兴奋</li>
-                <li style="--c:#64b4a0">你在变化中找到节奏，在不确定中释放潜力</li>
-                <li style="--c:#64b4a0">你像潺潺溪水，不争先后却总能到达大海</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#64b4a0,var(--i))"></div></div>
-      </div>
-    </div>
-
-    <div class="intro-cta">
-      <p>四个维度，十六种组合，每一种都是独一无二的人格光谱。<br>现在，让我们找到属于你的那束光。</p>
-      <button class="btn-p" onclick="startTest()" aria-label="开始测试"><i class="fas fa-play"></i> 开始测试</button>
-    </div>
-  </div>
+<div class="intro-wrap">
+<div class="intro-head">
+<div class="intro-badge"><i class="fas fa-layer-group" style="font-size:.6rem"></i> Dimensions</div>
+<h1 class="intro-title">四维光谱</h1>
+<p class="intro-subtitle">每一个人格都是四种维度交织的独特色彩</p>
+</div>
+<div class="dim-section" data-dim="Z"><div class="dim-section-inner"><div class="dim-header"><div class="dim-header-icon" style="background:var(--z-d);color:var(--z);border:1px solid rgba(240,160,48,.2)"><i class="fas fa-sun"></i></div><div class="dim-header-text"><h3 style="color:var(--z)">Z · 曜 / 渊</h3><div class="dim-q">你从何处获得能量？</div></div></div><div class="dim-body"><p class="dim-body-intro">曜与渊描述的是你的能量流向——你是在人群中焕发活力，还是在独处时恢复元气？这并非简单的"外向"与"内向"之分，而是关于你灵魂的充电方式。</p><div class="poles"><div class="pole"><div class="pole-label" style="color:var(--z)">曜<span class="pole-tag" style="background:var(--z-d);color:var(--z);border:1px solid rgba(240,160,48,.2)">外烁</span></div><div class="pole-keyword">人群是你的充电站</div><ul class="pole-desc"><li style="--c:var(--z)">你是一团向外的火焰，在与他人的互动中燃烧得最旺</li><li style="--c:var(--z)">每一次交谈、每一场聚会都在为你注入活力</li><li style="--c:var(--z)">你倾向于先行动再思考，在外部世界中找到方向</li><li style="--c:var(--z)">你表达想法时更习惯说出来，在对话中理清思路</li><li style="--c:var(--z)">你的能量流向：内 → 外，在输出中重新充能</li></ul></div><div class="pole-divider"><span class="pole-vs">VS</span></div><div class="pole"><div class="pole-label" style="color:var(--z)">渊<span class="pole-tag" style="background:rgba(120,160,220,.1);color:#78a0dc;border:1px solid rgba(120,160,220,.2)">内蕴</span></div><div class="pole-keyword">安静是你的圣地</div><ul class="pole-desc"><li style="--c:#78a0dc">你是一汪向内的深潭，在独处中积蓄最深沉的力量</li><li style="--c:#78a0dc">每一段沉默、每一次独处都在为你恢复元气</li><li style="--c:#78a0dc">你倾向于先思考再行动，在内在世界中找到答案</li><li style="--c:#78a0dc">你表达想法时更习惯写下来，在沉淀中厘清思路</li><li style="--c:#78a0dc">你的能量流向：外 → 内，在回收中重新充能</li></ul></div></div></div><div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#78a0dc,var(--z))"></div></div></div></div>
+<div class="dim-section" data-dim="E"><div class="dim-section-inner"><div class="dim-header"><div class="dim-header-icon" style="background:var(--e-d);color:var(--e);border:1px solid rgba(64,208,168,.2)"><i class="fas fa-eye"></i></div><div class="dim-header-text"><h3 style="color:var(--e)">E · 砚 / 翼</h3><div class="dim-q">你如何感知这个世界？</div></div></div><div class="dim-body"><p class="dim-body-intro">砚与翼描述的是你收集信息的方式——你信赖五感所及的具体实在，还是追随第六感所向的抽象可能？一方砚台研磨现实，一双翅膀飞向想象。</p><div class="poles"><div class="pole"><div class="pole-label" style="color:var(--e)">砚<span class="pole-tag" style="background:var(--e-d);color:var(--e);border:1px solid rgba(64,208,168,.2)">具象</span></div><div class="pole-keyword">目光落在眼前</div><ul class="pole-desc"><li style="--c:var(--e)">你关注具体、实在、可触摸的事物</li><li style="--c:var(--e)">你信赖经验：那些被验证过的、有据可查的方法</li><li style="--c:var(--e)">你是细节的收藏家，在微小的线索中发现真相</li><li style="--c:var(--e)">你关注"是什么"，追求精确和准确</li><li style="--c:var(--e)">你像一方砚台，脚踏实地研磨出墨色</li></ul></div><div class="pole-divider"><span class="pole-vs">VS</span></div><div class="pole"><div class="pole-label" style="color:var(--e)">翼<span class="pole-tag" style="background:rgba(160,120,220,.1);color:#a078dc;border:1px solid rgba(160,120,220,.2)">抽象</span></div><div class="pole-keyword">目光投向远方</div><ul class="pole-desc"><li style="--c:#a078dc">你关注潜在、可能、尚未实现的图景</li><li style="--c:#a078dc">你信赖直觉：那些灵感涌现的、冥冥中的指引</li><li style="--c:#a078dc">你是模式的发现者，在看似无关的事物间建立联系</li><li style="--c:#a078dc">你关注"可能是什么"，追求创新和突破</li><li style="--c:#a078dc">你像一双翅膀，在想象的天空中自由翱翔</li></ul></div></div></div><div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#a078dc,var(--e))"></div></div></div></div>
+<div class="dim-section" data-dim="T"><div class="dim-section-inner"><div class="dim-header"><div class="dim-header-icon" style="background:var(--t-d);color:var(--t);border:1px solid rgba(224,96,128,.2)"><i class="fas fa-scale-balanced"></i></div><div class="dim-header-text"><h3 style="color:var(--t)">T · 铮 / 泉</h3><div class="dim-q">你如何做出决断？</div></div></div><div class="dim-body"><p class="dim-body-intro">铮与泉描述的是你评判与抉择的依据——你以逻辑为尺丈量对错，还是以共情为秤衡量轻重？铮铮铁骨不偏不倚，清泉流淌绕石而行。</p><div class="poles"><div class="pole"><div class="pole-label" style="color:var(--t)">铮<span class="pole-tag" style="background:var(--t-d);color:var(--t);border:1px solid rgba(224,96,128,.2)">理性</span></div><div class="pole-keyword">心中有一杆秤</div><ul class="pole-desc"><li style="--c:var(--t)">你衡量的是逻辑与事实，追求客观真相</li><li style="--c:var(--t)">你剥离情感因素，找到最合理的答案</li><li style="--c:var(--t)">你重视效率与公平——对就是对，错就是错</li><li style="--c:var(--t)">你在批评中看到关怀，在直率中表达尊重</li><li style="--c:var(--t)">你像铮铮铁骨，在风浪中不偏不倚</li></ul></div><div class="pole-divider"><span class="pole-vs">VS</span></div><div class="pole"><div class="pole-label" style="color:var(--t)">泉<span class="pole-tag" style="background:rgba(80,160,220,.1);color:#50a0dc;border:1px solid rgba(80,160,220,.2)">共情</span></div><div class="pole-keyword">心中有一眼泉</div><ul class="pole-desc"><li style="--c:#50a0dc">你涌动的是关怀与价值，追求和谐共处</li><li style="--c:#50a0dc">你考虑每个人的感受，找到最温暖的答案</li><li style="--c:#50a0dc">你重视善意与包容——人比规则更重要</li><li style="--c:#50a0dc">你在鼓励中激发潜能，在温柔中传递力量</li><li style="--c:#50a0dc">你像清泉流淌，在石间绕行却不失方向</li></ul></div></div></div><div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#50a0dc,var(--t))"></div></div></div></div>
+<div class="dim-section" data-dim="I"><div class="dim-section-inner"><div class="dim-header"><div class="dim-header-icon" style="background:var(--i-d);color:var(--i);border:1px solid rgba(224,144,96,.2)"><i class="fas fa-mountain"></i></div><div class="dim-header-text"><h3 style="color:var(--i)">I · 岳 / 溪</h3><div class="dim-q">你如何规划与行动？</div></div></div><div class="dim-body"><p class="dim-body-intro">岳与溪描述的是你面对世界的步调——你如山岳般沉稳有序，还是如溪流般灵活随势？山岳不移定义方向，溪水不争终达大海。</p><div class="poles"><div class="pole"><div class="pole-label" style="color:var(--i)">岳<span class="pole-tag" style="background:var(--i-d);color:var(--i);border:1px solid rgba(224,144,96,.2)">定序</span></div><div class="pole-keyword">如山岳般稳重</div><ul class="pole-desc"><li style="--c:var(--i)">你每一步都踏在预定的路径上</li><li style="--c:var(--i)">你偏好计划：提前安排，按部就班，有始有终</li><li style="--c:var(--i)">你追求闭环——清单上的勾选让你满足</li><li style="--c:var(--i)">你在秩序中找到自由，在框架中释放创造力</li><li style="--c:var(--i)">你像巍峨山岳，不移动却定义了方向</li></ul></div><div class="pole-divider"><span class="pole-vs">VS</span></div><div class="pole"><div class="pole-label" style="color:var(--i)">溪<span class="pole-tag" style="background:rgba(100,180,160,.1);color:#64b4a0;border:1px solid rgba(100,180,160,.2)">流变</span></div><div class="pole-keyword">如溪流般灵动</div><ul class="pole-desc"><li style="--c:#64b4a0">你每一程都顺应地形而变化</li><li style="--c:#64b4a0">你偏好灵活：即兴发挥，随遇而安，拥抱变化</li><li style="--c:#64b4a0">你追求开放——意外的惊喜让你兴奋</li><li style="--c:#64b4a0">你在变化中找到节奏，在不确定中释放潜力</li><li style="--c:#64b4a0">你像潺潺溪水，不争先后却总能到达大海</li></ul></div></div></div><div class="dim-spectrum"><div class="dim-spectrum-fill" style="background:linear-gradient(90deg,#64b4a0,var(--i))"></div></div></div></div>
+<div class="intro-cta">
+<p>四个维度，十六种组合，每一种都是独一无二的人格光谱。<br>现在，让我们找到属于你的那束光。</p>
+<button class="btn-p" onclick="startTest()" aria-label="开始测试"><i class="fas fa-play"></i> 开始测试</button>
+</div>
+</div>
 </section>
 
-<!-- ===== 测试页 ===== -->
 <section id="pgTest" class="page" role="main" aria-label="人格测试">
-  <div class="wrap vc">
-    <div class="progress-wrap">
-      <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
-      <div class="progress-num" id="pNum">1/20</div>
-    </div>
-    <div class="q-area" id="qArea">
-      <div class="q-num" id="qNum"></div>
-      <h2 class="q-text" id="qText"></h2>
-      <div class="q-opts" id="qOpts"></div>
-    </div>
-  </div>
+<div class="wrap vc">
+<div class="progress-wrap"><div class="progress-track"><div class="progress-fill" id="pFill"></div></div><div class="progress-num" id="pNum">1/20</div></div>
+<div class="q-area" id="qArea">
+<div class="q-num" id="qNum"></div>
+<h2 class="q-text" id="qText"></h2>
+<div class="q-opts" id="qOpts"></div>
+<div class="q-nav">
+<button class="btn-s" id="btnPrev" onclick="prevQ()" disabled><i class="fas fa-chevron-left"></i> 上一题</button>
+<span class="nav-info" id="navInfo">1 / 20</span>
+<button class="btn-s" id="btnNext" onclick="nextQ()" disabled>下一题 <i class="fas fa-chevron-right"></i></button>
+</div>
+</div>
+</div>
 </section>
 
-<!-- ===== 结果页 ===== -->
 <section id="pgResult" class="page" role="main" aria-label="测试结果">
-  <div class="wrap" style="text-align:center">
-    <div class="r-header">
-      <div class="r-code" id="rCode"></div>
-      <div class="r-icon-wrap" id="rIcon"></div>
-      <h1 class="r-name" id="rName"></h1>
-      <div class="r-en" id="rEn"></div>
-      <p class="r-motto" id="rMotto"></p>
-    </div>
-    <div class="dim-bars" id="dimBars"></div>
-    <div class="r-section" id="sDesc"><h3><i class="fas fa-scroll"></i> 人格解读</h3><p id="rDesc"></p></div>
-    <div class="r-section" id="sStr"><h3><i class="fas fa-gem"></i> 核心优势</h3><div class="tags" id="rStr"></div></div>
-    <div class="r-section" id="sWeak"><h3><i class="fas fa-fire"></i> 潜在盲区</h3><div class="tags" id="rWeak"></div></div>
-    <div class="r-section" id="sCareer"><h3><i class="fas fa-compass"></i> 适合领域</h3><div class="tags" id="rCareer"></div></div>
-    <div class="r-section" id="sGrow"><h3><i class="fas fa-seedling"></i> 成长建议</h3><p id="rGrow"></p></div>
-    <div class="r-actions">
-      <button class="btn-p" onclick="restart()"><i class="fas fa-redo"></i> 重新测试</button>
-      <button class="btn-s" onclick="copyResult()"><i class="fas fa-copy"></i> 复制结果</button>
-    </div>
-  </div>
+<div class="wrap" style="text-align:center">
+<div class="r-header">
+<div class="r-code" id="rCode"></div>
+<div class="r-icon-wrap" id="rIcon"></div>
+<h1 class="r-name" id="rName"></h1>
+<div class="r-en" id="rEn"></div>
+<p class="r-motto" id="rMotto"></p>
+</div>
+<div class="radar-wrap"><canvas id="radarCanvas" width="640" height="640"></canvas></div>
+<div class="dim-bars" id="dimBars"></div>
+<div class="r-section" id="sDesc"><h3><i class="fas fa-scroll"></i> 人格解读</h3><p id="rDesc"></p></div>
+<div class="r-section" id="sStr"><h3><i class="fas fa-gem"></i> 核心优势</h3><div class="tags" id="rStr"></div></div>
+<div class="r-section" id="sWeak"><h3><i class="fas fa-fire"></i> 潜在盲区</h3><div class="tags" id="rWeak"></div></div>
+<div class="r-section" id="sCareer"><h3><i class="fas fa-compass"></i> 适合领域</h3><div class="tags" id="rCareer"></div></div>
+<div class="r-section" id="sGrow"><h3><i class="fas fa-seedling"></i> 成长建议</h3><p id="rGrow"></p></div>
+<div class="r-actions">
+<button class="btn-p" onclick="restart()"><i class="fas fa-redo"></i> 重新测试</button>
+<button class="btn-s" onclick="copyResult()"><i class="fas fa-copy"></i> 复制结果</button>
+</div>
+</div>
 </section>
 
+<div class="footer-line">ZETI was founded by Wu Wangze.</div>
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
 <script>
-/* =============================================
-   ZETI 人格测试
-   ============================================= */
-
-// ---- 题库 ----
-const Q=[
-  {d:'Z',t:'周末终于到了，你更期待怎样度过？',o:[{t:'约上朋友出门聚餐、逛街或参加活动',v:'B'},{t:'窝在家里读书、追剧或安静地做自己的事',v:'G'}]},
-  {d:'Z',t:'在一个大型社交场合中，你通常的状态是？',o:[{t:'如鱼得水，主动和不同的人聊天交流',v:'B'},{t:'略显拘谨，更愿意和一两个熟人待在一起',v:'G'}]},
-  {d:'Z',t:'当你遇到烦心事时，第一反应是？',o:[{t:'找人倾诉，在交流中理清思绪',v:'B'},{t:'独自消化，在沉默和反思中找到答案',v:'G'}]},
-  {d:'Z',t:'你理想中的工作氛围是？',o:[{t:'热闹开放、充满协作与讨论的团队',v:'B'},{t:'安静独立、可以专注思考的私人空间',v:'G'}]},
-  {d:'Z',t:'经过一整天的高强度活动后，你最想做什么？',o:[{t:'继续和伙伴聊天放松，分享今天的经历',v:'B'},{t:'回到独处的空间，安静地恢复能量',v:'G'}]},
-  {d:'E',t:'阅读一本书时，你更容易被什么吸引？',o:[{t:'翔实的案例、数据和可操作的细节',v:'F'},{t:'核心思想、隐喻和字里行间的深意',v:'P'}]},
-  {d:'E',t:'面对一个新项目，你首先关注的是？',o:[{t:'现有资源、具体步骤和可行性',v:'F'},{t:'项目的愿景、意义和未来可能',v:'P'}]},
-  {d:'E',t:'你更欣赏哪种人？',o:[{t:'脚踏实地、经验丰富的实干家',v:'F'},{t:'天马行空、创意无限的梦想家',v:'P'}]},
-  {d:'E',t:'当描述一段旅行经历时，你倾向于？',o:[{t:'按时间线详细叙述去了哪、看了什么',v:'F'},{t:'讲述整体感受和那些瞬间的意义',v:'P'}]},
-  {d:'E',t:'解决问题时，你更信任哪种方式？',o:[{t:'借鉴过往经验和已验证的方法',v:'F'},{t:'跟随直觉，尝试从未有过的新思路',v:'P'}]},
-  {d:'T',t:'做重要决定时，你更看重？',o:[{t:'客观数据和逻辑推理',v:'I'},{t:'内心价值观和对他人的影响',v:'W'}]},
-  {d:'T',t:'好友向你倾诉困境，你的第一反应是？',o:[{t:'帮 Ta 分析问题，提出解决方案',v:'I'},{t:'先表示理解和共情，给予情感支持',v:'W'}]},
-  {d:'T',t:'评价一项工作成果时，你更注重？',o:[{t:'是否达到了客观标准和效率要求',v:'I'},{t:'是否体现了用心和对他人的关怀',v:'W'}]},
-  {d:'T',t:'面对一条不合理的规定，你会？',o:[{t:'用事实和论据去挑战它',v:'I'},{t:'从人情和道德角度去质疑它',v:'W'}]},
-  {d:'T',t:'团队中出现分歧时，你倾向于？',o:[{t:'基于最优解做判断，哪怕有人不高兴',v:'I'},{t:'寻找各方都能接受的方案，维护和谐',v:'W'}]},
-  {d:'I',t:'对于旅行，你更倾向于？',o:[{t:'提前规划好行程、住宿和预算',v:'A'},{t:'随心而行，到了再决定',v:'D'}]},
-  {d:'I',t:'你的工作桌面通常是？',o:[{t:'整齐有序，每样东西都有固定位置',v:'A'},{t:'看似凌乱，但自己能找到需要的东西',v:'D'}]},
-  {d:'I',t:'面对截止日期，你通常？',o:[{t:'提前完成，留出缓冲时间',v:'A'},{t:'在压力中爆发，临近时冲刺',v:'D'}]},
-  {d:'I',t:'你更享受哪种生活节奏？',o:[{t:'有规律、有计划的日常',v:'A'},{t:'充满变化和意外惊喜的日子',v:'D'}]},
-  {d:'I',t:'当同时面对多个任务时，你倾向于？',o:[{t:'列出清单，按优先级逐一完成',v:'A'},{t:'根据当下的状态和灵感来选择',v:'D'}]}
+var Q=[
+{d:'Z',t:'周末终于到了，你更期待怎样度过？',o:[{t:'约上朋友出门聚餐、逛街或参加活动',v:'B'},{t:'窝在家里读书、追剧或安静地做自己的事',v:'G'}]},
+{d:'Z',t:'在一个大型社交场合中，你通常的状态是？',o:[{t:'如鱼得水，主动和不同的人聊天交流',v:'B'},{t:'略显拘谨，更愿意和一两个熟人待在一起',v:'G'}]},
+{d:'Z',t:'当你遇到烦心事时，第一反应是？',o:[{t:'找人倾诉，在交流中理清思绪',v:'B'},{t:'独自消化，在沉默和反思中找到答案',v:'G'}]},
+{d:'Z',t:'你理想中的工作氛围是？',o:[{t:'热闹开放、充满协作与讨论的团队',v:'B'},{t:'安静独立、可以专注思考的私人空间',v:'G'}]},
+{d:'Z',t:'经过一整天的高强度活动后，你最想做什么？',o:[{t:'继续和伙伴聊天放松，分享今天的经历',v:'B'},{t:'回到独处的空间，安静地恢复能量',v:'G'}]},
+{d:'E',t:'阅读一本书时，你更容易被什么吸引？',o:[{t:'翔实的案例、数据和可操作的细节',v:'F'},{t:'核心思想、隐喻和字里行间的深意',v:'P'}]},
+{d:'E',t:'面对一个新项目，你首先关注的是？',o:[{t:'现有资源、具体步骤和可行性',v:'F'},{t:'项目的愿景、意义和未来可能',v:'P'}]},
+{d:'E',t:'你更欣赏哪种人？',o:[{t:'脚踏实地、经验丰富的实干家',v:'F'},{t:'天马行空、创意无限的梦想家',v:'P'}]},
+{d:'E',t:'当描述一段旅行经历时，你倾向于？',o:[{t:'按时间线详细叙述去了哪、看了什么',v:'F'},{t:'讲述整体感受和那些瞬间的意义',v:'P'}]},
+{d:'E',t:'解决问题时，你更信任哪种方式？',o:[{t:'借鉴过往经验和已验证的方法',v:'F'},{t:'跟随直觉，尝试从未有过的新思路',v:'P'}]},
+{d:'T',t:'做重要决定时，你更看重？',o:[{t:'客观数据和逻辑推理',v:'I'},{t:'内心价值观和对他人的影响',v:'W'}]},
+{d:'T',t:'好友向你倾诉困境，你的第一反应是？',o:[{t:'帮 Ta 分析问题，提出解决方案',v:'I'},{t:'先表示理解和共情，给予情感支持',v:'W'}]},
+{d:'T',t:'评价一项工作成果时，你更注重？',o:[{t:'是否达到了客观标准和效率要求',v:'I'},{t:'是否体现了用心和对他人的关怀',v:'W'}]},
+{d:'T',t:'面对一条不合理的规定，你会？',o:[{t:'用事实和论据去挑战它',v:'I'},{t:'从人情和道德角度去质疑它',v:'W'}]},
+{d:'T',t:'团队中出现分歧时，你倾向于？',o:[{t:'基于最优解做判断，哪怕有人不高兴',v:'I'},{t:'寻找各方都能接受的方案，维护和谐',v:'W'}]},
+{d:'I',t:'对于旅行，你更倾向于？',o:[{t:'提前规划好行程、住宿和预算',v:'A'},{t:'随心而行，到了再决定',v:'D'}]},
+{d:'I',t:'你的工作桌面通常是？',o:[{t:'整齐有序，每样东西都有固定位置',v:'A'},{t:'看似凌乱，但自己能找到需要的东西',v:'D'}]},
+{d:'I',t:'面对截止日期，你通常？',o:[{t:'提前完成，留出缓冲时间',v:'A'},{t:'在压力中爆发，临近时冲刺',v:'D'}]},
+{d:'I',t:'你更享受哪种生活节奏？',o:[{t:'有规律、有计划的日常',v:'A'},{t:'充满变化和意外惊喜的日子',v:'D'}]},
+{d:'I',t:'当同时面对多个任务时，你倾向于？',o:[{t:'列出清单，按优先级逐一完成',v:'A'},{t:'根据当下的状态和灵感来选择',v:'D'}]}
 ];
 
-// ---- 16种人格 ----
-const P={
+var PData={
 BFIA:{name:'破晓者',en:'Dawnbreaker',icon:'fa-sun',motto:'"以行动丈量世界，以秩序铸就辉煌"',desc:'你是天生的组织者与行动派。你从人群中汲取能量，善于将抽象目标转化为具体步骤，以客观的判断力和坚定的执行力带领团队前进。在你看来，没有解决不了的问题——只有尚未找到方法的问题。你的世界黑白分明、高效运转，你身边的人既敬畏你的果断，又依赖你的可靠。',s:['战略统筹','果断执行','目标驱动','组织领导','抗压能力'],w:['过于强势','忽略感受','难以放松','控制倾向'],c:['企业高管','项目经理','军事指挥','运营总监','司法系统'],g:'试着在 rushing forward 之前暂停三秒，问问自己："这个决定会如何影响他人的感受？" 你不需要放慢脚步，只需要偶尔换一副镜片看世界。柔软不是软弱——它是你铠甲之下最被低估的力量。'},
 BFID:{name:'游隼',en:'Peregrine',icon:'fa-bolt',motto:'"锁定目标，俯冲而下；风向若变，瞬间调整"',desc:'你是一只翱翔在旷野中的游隼——目光锐利，锁定目标便果断出击，但若风向有变，你也能瞬间调整航线。你善于在复杂现实中迅速找到突破口，凭借灵活的战术和冷静的判断，常常在混乱中杀出一条路。你讨厌被条框束缚，却总能在关键时刻交出令人惊叹的答卷。',s:['快速决策','灵活应变','危机处理','实战洞察','独立行动'],w:['缺乏耐心','计划性弱','容易冲动','忽视长远'],c:['急诊医生','创业者','交易员','记者','特种行业'],g:'你的速度是你最大的武器，也是最大的陷阱。试着偶尔停下来——不是为了休息，而是为了确认自己冲刺的方向是否仍然值得。一只有方向感的游隼，比一只只会俯冲的游隼飞得更远。'},
 BFWA:{name:'磐心',en:'Stalwart',icon:'fa-shield-halved',motto:'"以温暖筑起堡垒，以秩序守护所爱"',desc:'你像一座灯塔，为身边的人提供温暖的光芒和稳固的航标。你善于感知他人的需求，用真诚的关怀建立深厚的联结；同时，你又有着出色的组织能力，确保每一个被你守护的人都能在有序的环境中获得安全感。你是人群中那个"有你在就安心"的存在。',s:['可靠守护','共情组织','团队凝聚','细致关怀','责任担当'],w:['过度付出','难以拒绝','承担过多','忽略自我'],c:['教师','护士长','社区运营','人力资源','社会工作'],g:'你总是把别人的需求放在前面，但请记住：灯塔也需要燃料。学会为自己充电不是自私——它是让你继续照亮他人的唯一方式。设立健康的边界，才能让温暖持久。'},
@@ -621,156 +310,343 @@ GPWA:{name:'月华',en:'Moonlight',icon:'fa-moon',motto:'"温柔而不失方向�
 GPWD:{name:'云梦',en:'Dreamweaver',icon:'fa-cloud-moon',motto:'"在梦境与现实间编织意义，于自由中寻找万物相连的隐秘脉络"',desc:'你活在两个世界的交汇处——现实的土壤与想象的天空。你从独处中汲取灵感，用共情理解他人的痛苦与渴望，然后用独特的方式将这一切编织成有意义的作品或行动。你是这个世界最需要的那种梦行者：既有勇气深入潜意识的海底，又有温柔将所见带回来分享给他人。',s:['想象力丰富','深度共情','艺术表达','灵活多变','灵性直觉'],w:['逃避现实','情绪敏感','缺乏条理','难以落地'],c:['诗人','电影导演','游戏叙事','心理治愈','跨领域艺术家'],g:'梦是你的翅膀，也是你的迷宫。试着给最深的那个梦一个具体的形状——一首诗、一幅画、一段代码、一次对话。当梦被编织成现实，你才真正成为造梦者，而非梦中人。'}
 };
 
-let cur=0,ans={},sc={Z:0,E:0,T:0,I:0};
+var cur=0;
+var ans={};
+var sc={Z:0,E:0,T:0,I:0};
 
-// ---- 星空 ----
 (function(){
-  const c=document.getElementById('sky'),ctx=c.getContext('2d');
-  let w,h,stars=[],mouse={x:.5,y:.5};
-  function resize(){
-    const dpr=Math.min(window.devicePixelRatio||1,2);
-    w=window.innerWidth;h=window.innerHeight;
-    c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);stars=[];
-    const n=Math.min(Math.floor(w*h/3500),350);
-    for(let i=0;i<n;i++)stars.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.1+.3,a:Math.random()*.55+.2,sp:Math.random()*.4+.06,ph:Math.random()*Math.PI*2});
-  }
-  resize();let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(resize,200)});
-  document.addEventListener('mousemove',e=>{mouse.x=e.clientX/w;mouse.y=e.clientY/h});
-  let t=0;
-  function draw(){
-    ctx.clearRect(0,0,w,h);t+=.008;
-    const mx=(mouse.x-.5)*8,my=(mouse.y-.5)*6;
-    for(const s of stars){
-      const fl=Math.sin(t*s.sp*8+s.ph)*.3+.7;
-      ctx.beginPath();ctx.arc(s.x+mx*s.r*2,s.y+my*s.r*2,Math.max(.1,s.r),0,Math.PI*2);
-      ctx.fillStyle=`rgba(232,228,220,${s.a*fl})`;ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  draw();
+var c=document.getElementById('sky'),ctx=c.getContext('2d');
+var w,h,stars=[],mouse={x:.5,y:.5};
+function resize(){
+var dpr=Math.min(window.devicePixelRatio||1,2);
+w=window.innerWidth;h=window.innerHeight;
+c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';
+ctx.setTransform(dpr,0,0,dpr,0,0);stars=[];
+var n=Math.min(Math.floor(w*h/3500),350);
+for(var i=0;i<n;i++)stars.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.1+.3,a:Math.random()*.55+.2,sp:Math.random()*.4+.06,ph:Math.random()*Math.PI*2});
+}
+resize();var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(resize,200)});
+document.addEventListener('mousemove',function(e){mouse.x=e.clientX/w;mouse.y=e.clientY/h});
+var t=0;
+function draw(){
+ctx.clearRect(0,0,w,h);t+=.008;
+var mx=(mouse.x-.5)*8,my=(mouse.y-.5)*6;
+for(var i=0;i<stars.length;i++){var s=stars[i];var fl=Math.sin(t*s.sp*8+s.ph)*.3+.7;ctx.beginPath();ctx.arc(s.x+mx*s.r*2,s.y+my*s.r*2,Math.max(.1,s.r),0,Math.PI*2);ctx.fillStyle='rgba(232,228,220,'+s.a*fl+')';ctx.fill();}
+requestAnimationFrame(draw);
+}
+draw();
 })();
 
-// ---- 页面切换（核心修复） ----
 function showPage(id){
-  const pages=document.querySelectorAll('.page');
-  // 当前活跃页退出
-  pages.forEach(p=>{p.classList.remove('active');p.classList.add('exit')});
-  setTimeout(()=>{
-    pages.forEach(p=>p.classList.remove('exit'));
-    const el=document.getElementById(id);
-    // 重置该页面内部滚动位置到顶部
-    el.scrollTop=0;
-    el.classList.add('active');
-    if(id==='pgIntro') observeDimSections();
-  },380);
+var pages=document.querySelectorAll('.page');
+for(var i=0;i<pages.length;i++){pages[i].classList.remove('active');pages[i].classList.add('exit');}
+setTimeout(function(){
+for(var i=0;i<pages.length;i++){pages[i].classList.remove('exit');}
+var el=document.getElementById(id);el.scrollTop=0;el.classList.add('active');
+if(id==='pgIntro')observeDimSections();
+},380);
 }
 
-// ---- 维度介绍页滚动观察 ----
-let introObserver=null;
+var introObserver=null;
 function observeDimSections(){
-  if(introObserver)introObserver.disconnect();
-  const secs=document.querySelectorAll('.dim-section');
-  secs.forEach(s=>s.classList.remove('vis'));
-  // 以介绍页元素为滚动根
-  const root=document.getElementById('pgIntro');
-  introObserver=new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')});
-  },{threshold:0.12,root:root,rootMargin:'0px 0px -30px 0px'});
-  secs.forEach(s=>introObserver.observe(s));
+if(introObserver)introObserver.disconnect();
+var secs=document.querySelectorAll('.dim-section');
+for(var i=0;i<secs.length;i++)secs[i].classList.remove('vis');
+var root=document.getElementById('pgIntro');
+introObserver=new IntersectionObserver(function(entries){for(var i=0;i<entries.length;i++){if(entries[i].isIntersecting)entries[i].target.classList.add('vis')}},{threshold:0.12,root:root,rootMargin:'0px 0px -30px 0px'});
+for(var i=0;i<secs.length;i++)introObserver.observe(secs[i]);
 }
 
 function goIntro(){showPage('pgIntro')}
 
 function startTest(){
-  cur=0;ans={};sc={Z:0,E:0,T:0,I:0};
-  showPage('pgTest');
-  setTimeout(renderQ,450);
+cur=0;ans={};sc={Z:0,E:0,T:0,I:0};
+showPage('pgTest');
+setTimeout(renderQ,450);
+}
+
+function recalcScores(){
+sc={Z:0,E:0,T:0,I:0};
+var pm={Z:'B',E:'F',T:'I',I:'A'};
+for(var i=0;i<Q.length;i++){
+if(ans[i]&&ans[i].v===pm[ans[i].d])sc[ans[i].d]++;
+}
+}
+
+function updateNavButtons(){
+var btnPrev=document.getElementById('btnPrev');
+var btnNext=document.getElementById('btnNext');
+btnPrev.disabled=(cur===0);
+if(cur===Q.length-1){
+btnNext.innerHTML='查看结果 <i class="fas fa-check"></i>';
+}else{
+btnNext.innerHTML='下一题 <i class="fas fa-chevron-right"></i>';
+}
+btnNext.disabled=!ans.hasOwnProperty(cur);
 }
 
 function renderQ(){
-  const q=Q[cur],area=document.getElementById('qArea');
-  area.classList.remove('q-enter');area.classList.add('q-exit');
-  setTimeout(()=>{
-    document.getElementById('qNum').textContent=`第 ${cur+1} 题 · ${dimLabel(q.d)}`;
-    document.getElementById('qText').textContent=q.t;
-    const opts=document.getElementById('qOpts');opts.innerHTML='';
-    q.o.forEach((o,i)=>{
-      const el=document.createElement('div');el.className='opt';
-      el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-label',o.t);
-      el.innerHTML=`<span class="opt-lbl">${String.fromCharCode(65+i)}</span><span class="opt-txt">${o.t}</span>`;
-      el.addEventListener('click',e=>{addRipple(el,e);selectAns(q.d,o.v)});
-      el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectAns(q.d,o.v)}});
-      opts.appendChild(el);
-    });
-    document.getElementById('pFill').style.width=cur/Q.length*100+'%';
-    document.getElementById('pNum').textContent=`${cur+1}/${Q.length}`;
-    area.classList.remove('q-exit');area.classList.add('q-enter');
-  },280);
-}
-function dimLabel(d){return{Z:'能量方向',E:'感知方式',T:'决断依据',I:'行动步调'}[d]||''}
-function addRipple(el,e){
-  const r=document.createElement('span');r.className='opt-ripple';
-  const rect=el.getBoundingClientRect(),x=(e.clientX||rect.left+rect.width/2)-rect.left,y=(e.clientY||rect.top+rect.height/2)-rect.top,size=Math.max(rect.width,rect.height)*2;
-  r.style.cssText=`width:${size}px;height:${size}px;left:${x-size/2}px;top:${y-size/2}px`;
-  el.appendChild(r);setTimeout(()=>r.remove(),600);
-}
-function selectAns(dim,val){
-  ans[cur]={d:dim,v:val};
-  const pm={Z:'B',E:'F',T:'I',I:'A'};
-  if(val===pm[dim])sc[dim]++;
-  if(cur<Q.length-1){cur++;renderQ()}else showResult();
-}
-function calcType(){return(sc.Z>=3?'B':'G')+(sc.E>=3?'F':'P')+(sc.T>=3?'I':'W')+(sc.I>=3?'A':'D')}
+var q=Q[cur];
+var area=document.getElementById('qArea');
+area.classList.remove('q-enter');
+area.classList.add('q-exit');
 
-function showResult(){
-  const type=calcType(),p=P[type];if(!p)return;
-  document.getElementById('rCode').textContent=type.split('').join(' · ');
-  document.getElementById('rIcon').innerHTML=`<i class="fas ${p.icon}"></i>`;
-  document.getElementById('rName').textContent=p.name;
-  document.getElementById('rEn').textContent=p.en;
-  document.getElementById('rMotto').textContent=p.motto;
-  document.getElementById('rDesc').textContent=p.desc;
-  document.getElementById('rGrow').textContent=p.g;
-  const mk=(el,arr,cls)=>{el.innerHTML='';arr.forEach(t=>{const s=document.createElement('span');s.className='tag '+(cls||'');s.textContent=t;el.appendChild(s)})};
-  mk(document.getElementById('rStr'),p.s,'good');
-  mk(document.getElementById('rWeak'),p.w,'warn');
-  mk(document.getElementById('rCareer'),p.c,'');
-  const dc=[{k:'Z',l:'曜',r:'渊',c:'var(--z)',p:'B'},{k:'E',l:'砚',r:'翼',c:'var(--e)',p:'F'},{k:'T',l:'铮',r:'泉',c:'var(--t)',p:'I'},{k:'I',l:'岳',r:'溪',c:'var(--i)',p:'A'}];
-  const bars=document.getElementById('dimBars');bars.innerHTML='';
-  dc.forEach(d=>{
-    const s=sc[d.k],pct=s/5*100,isP=s>=3,disp=Math.max(pct,100-pct),label=isP?d.l:d.r;
-    const item=document.createElement('div');item.className='dim-item';
-    item.innerHTML=`<div class="dim-head"><span class="ds">${d.l} / ${d.r}</span><span class="dr">${label} ${Math.round(disp)}%</span></div><div class="dim-track"><div class="dim-fill" data-w="${disp}" style="background:${d.c};color:${d.c}"></div></div>`;
-    bars.appendChild(item);
-  });
-  document.querySelectorAll('.r-section').forEach(s=>s.classList.remove('vis'));
-  showPage('pgResult');
-  setTimeout(()=>{
-    document.querySelectorAll('.dim-fill').forEach(b=>{b.style.width=b.dataset.w+'%';b.classList.add('animated')});
-    ['sDesc','sStr','sWeak','sCareer','sGrow'].forEach((id,i)=>{
-      setTimeout(()=>document.getElementById(id).classList.add('vis'),250+i*180);
-    });
-  },700);
+setTimeout(function(){
+document.getElementById('qNum').textContent='第 '+(cur+1)+' 题 · '+dimLabel(q.d);
+document.getElementById('qText').textContent=q.t;
+var opts=document.getElementById('qOpts');
+opts.innerHTML='';
+for(var i=0;i<q.o.length;i++){
+(function(idx){
+var o=q.o[idx];
+var el=document.createElement('div');
+el.className='opt';
+if(ans[cur]&&ans[cur].v===o.v)el.className+=' selected';
+el.setAttribute('role','button');
+el.setAttribute('tabindex','0');
+el.setAttribute('aria-label',o.t);
+el.innerHTML='<span class="opt-lbl">'+String.fromCharCode(65+idx)+'</span><span class="opt-txt">'+o.t+'</span>';
+el.addEventListener('click',function(e){addRipple(el,e);selectAns(q.d,o.v);});
+el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();selectAns(q.d,o.v);}});
+opts.appendChild(el);
+})(i);
+}
+document.getElementById('pFill').style.width=cur/Q.length*100+'%';
+document.getElementById('pNum').textContent=(cur+1)+'/'+Q.length;
+document.getElementById('navInfo').textContent=(cur+1)+' / '+Q.length;
+updateNavButtons();
+area.classList.remove('q-exit');
+area.classList.add('q-enter');
+},280);
+}
+
+function dimLabel(d){return{Z:'能量方向',E:'感知方式',T:'决断依据',I:'行动步调'}[d]||'';}
+
+function addRipple(el,e){
+var r=document.createElement('span');r.className='opt-ripple';
+var rect=el.getBoundingClientRect();
+var x=(e.clientX||rect.left+rect.width/2)-rect.left;
+var y=(e.clientY||rect.top+rect.height/2)-rect.top;
+var size=Math.max(rect.width,rect.height)*2;
+r.style.cssText='width:'+size+'px;height:'+size+'px;left:'+(x-size/2)+'px;top:'+(y-size/2)+'px';
+el.appendChild(r);setTimeout(function(){r.remove()},600);
+}
+
+function selectAns(dim,val){
+ans[cur]={d:dim,v:val};
+recalcScores();
+var optEls=document.querySelectorAll('.opt');
+var q=Q[cur];
+for(var i=0;i<optEls.length;i++){
+if(q.o[i].v===val)optEls[i].classList.add('selected');
+else optEls[i].classList.remove('selected');
+}
+document.getElementById('btnNext').disabled=false;
+}
+
+function prevQ(){
+if(cur>0){cur--;renderQ();}
+}
+
+function nextQ(){
+if(!ans.hasOwnProperty(cur))return;
+if(cur<Q.length-1){cur++;renderQ();}
+else{doShowResult();}
+}
+
+function calcType(){
+return(sc.Z>=3?'B':'G')+(sc.E>=3?'F':'P')+(sc.T>=3?'I':'W')+(sc.I>=3?'A':'D');
+}
+
+function hexToRgba(hex,alpha){
+var r=parseInt(hex.slice(1,3),16);
+var g=parseInt(hex.slice(3,5),16);
+var b=parseInt(hex.slice(5,7),16);
+return'rgba('+r+','+g+','+b+','+alpha+')';
+}
+
+function drawRadar(){
+var canvas=document.getElementById('radarCanvas');
+var ctx=canvas.getContext('2d');
+var dpr=Math.min(window.devicePixelRatio||1,2);
+var size=640;
+canvas.width=size*dpr;canvas.height=size*dpr;
+canvas.style.width=size/2+'px';canvas.style.height=size/2+'px';
+ctx.setTransform(dpr,0,0,dpr,0,0);
+
+var cx=size/2,cy=size/2,maxR=size*0.34;
+var dims=[
+{label:'曜/渊',color:'#f0a030',val:sc.Z},
+{label:'砚/翼',color:'#40d0a8',val:sc.E},
+{label:'铮/泉',color:'#e06080',val:sc.T},
+{label:'岳/溪',color:'#e09060',val:sc.I}
+];
+var n=dims.length;
+var angleStep=Math.PI*2/n;
+var startAngle=-Math.PI/2;
+
+ctx.clearRect(0,0,size,size);
+
+for(var ring=5;ring>=1;ring--){
+var r=maxR*(ring/5);
+ctx.beginPath();
+for(var i=0;i<=n;i++){
+var a=startAngle+angleStep*(i%n);
+var px=cx+Math.cos(a)*r;var py=cy+Math.sin(a)*r;
+if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+}
+ctx.closePath();
+ctx.strokeStyle='rgba(212,162,76,'+(0.06+ring*0.02)+')';
+ctx.lineWidth=1;ctx.stroke();
+if(ring===5){ctx.fillStyle='rgba(212,162,76,0.02)';ctx.fill();}
+}
+
+for(var i=0;i<n;i++){
+var a=startAngle+angleStep*i;
+ctx.beginPath();ctx.moveTo(cx,cy);
+ctx.lineTo(cx+Math.cos(a)*maxR,cy+Math.sin(a)*maxR);
+ctx.strokeStyle='rgba(212,162,76,0.1)';ctx.lineWidth=1;ctx.stroke();
+}
+
+ctx.beginPath();
+for(var i=0;i<=n;i++){
+var idx=i%n;
+var a=startAngle+angleStep*idx;
+var val=dims[idx].val/5;
+var r=maxR*Math.max(val,0.05);
+var px=cx+Math.cos(a)*r;var py=cy+Math.sin(a)*r;
+if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+}
+ctx.closePath();
+var grad=ctx.createRadialGradient(cx,cy,0,cx,cy,maxR);
+grad.addColorStop(0,'rgba(212,162,76,0.25)');
+grad.addColorStop(1,'rgba(212,162,76,0.08)');
+ctx.fillStyle=grad;ctx.fill();
+ctx.strokeStyle='rgba(212,162,76,0.6)';ctx.lineWidth=2;ctx.stroke();
+
+for(var i=0;i<n;i++){
+var a=startAngle+angleStep*i;
+var val=dims[i].val/5;
+var r=maxR*Math.max(val,0.05);
+var px=cx+Math.cos(a)*r;var py=cy+Math.sin(a)*r;
+
+ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);
+ctx.fillStyle=dims[i].color;ctx.fill();
+ctx.strokeStyle='rgba(7,7,13,0.6)';ctx.lineWidth=2;ctx.stroke();
+
+var glow=ctx.createRadialGradient(px,py,0,px,py,12);
+glow.addColorStop(0,hexToRgba(dims[i].color,0.3));
+glow.addColorStop(1,'rgba(0,0,0,0)');
+ctx.beginPath();ctx.arc(px,py,12,0,Math.PI*2);
+ctx.fillStyle=glow;ctx.fill();
+}
+
+for(var i=0;i<n;i++){
+var a=startAngle+angleStep*i;
+var lr=maxR+36;
+var lx=cx+Math.cos(a)*lr;var ly=cy+Math.sin(a)*lr;
+
+ctx.font='600 18px "Noto Serif SC",serif';
+ctx.fillStyle=dims[i].color;
+ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText(dims[i].label,lx,ly-10);
+
+ctx.font='300 13px "Noto Sans SC",sans-serif';
+ctx.fillStyle='rgba(160,152,130,0.7)';
+var pct=Math.max(dims[i].val/5*100,(5-dims[i].val)/5*100);
+ctx.fillText(Math.round(pct)+'%',lx,ly+12);
+}
+}
+
+function doShowResult(){
+var type=calcType();
+var p=PData[type];
+if(!p)return;
+
+document.getElementById('rCode').textContent=type.split('').join(' · ');
+document.getElementById('rIcon').innerHTML='<i class="fas '+p.icon+'"></i>';
+document.getElementById('rName').textContent=p.name;
+document.getElementById('rEn').textContent=p.en;
+document.getElementById('rMotto').textContent=p.motto;
+document.getElementById('rDesc').textContent=p.desc;
+document.getElementById('rGrow').textContent=p.g;
+
+function mkTags(el,arr,cls){
+el.innerHTML='';
+for(var i=0;i<arr.length;i++){
+var s=document.createElement('span');
+s.className='tag '+(cls||'');
+s.textContent=arr[i];
+el.appendChild(s);
+}
+}
+mkTags(document.getElementById('rStr'),p.s,'good');
+mkTags(document.getElementById('rWeak'),p.w,'warn');
+mkTags(document.getElementById('rCareer'),p.c,'');
+
+var dc=[
+{k:'Z',l:'曜',r:'渊',c:'var(--z)'},
+{k:'E',l:'砚',r:'翼',c:'var(--e)'},
+{k:'T',l:'铮',r:'泉',c:'var(--t)'},
+{k:'I',l:'岳',r:'溪',c:'var(--i)'}
+];
+var bars=document.getElementById('dimBars');bars.innerHTML='';
+for(var i=0;i<dc.length;i++){
+var d=dc[i];
+var s=sc[d.k];
+var pct=s/5*100;
+var isP=s>=3;
+var disp=Math.max(pct,100-pct);
+var label=isP?d.l:d.r;
+var item=document.createElement('div');item.className='dim-item';
+item.innerHTML='<div class="dim-head"><span class="ds">'+d.l+' / '+d.r+'</span><span class="dr">'+label+' '+Math.round(disp)+'%</span></div><div class="dim-track"><div class="dim-fill" data-w="'+disp+'" style="background:'+d.c+';color:'+d.c+'"></div></div>';
+bars.appendChild(item);
+}
+
+var sections=document.querySelectorAll('.r-section');
+for(var i=0;i<sections.length;i++)sections[i].classList.remove('vis');
+
+drawRadar();
+showPage('pgResult');
+
+setTimeout(function(){
+var fills=document.querySelectorAll('.dim-fill');
+for(var i=0;i<fills.length;i++){fills[i].style.width=fills[i].dataset.w+'%';fills[i].classList.add('animated');}
+var secIds=['sDesc','sStr','sWeak','sCareer','sGrow'];
+for(var i=0;i<secIds.length;i++){
+(function(idx){setTimeout(function(){document.getElementById(secIds[idx]).classList.add('vis')},250+idx*180)})(i);
+}
+},700);
 }
 
 function restart(){
-  document.querySelectorAll('.r-section').forEach(s=>s.classList.remove('vis'));
-  document.querySelectorAll('.dim-fill').forEach(b=>{b.style.width='0';b.classList.remove('animated')});
-  showPage('pgWelcome');
+var sections=document.querySelectorAll('.r-section');
+for(var i=0;i<sections.length;i++)sections[i].classList.remove('vis');
+var fills=document.querySelectorAll('.dim-fill');
+for(var i=0;i<fills.length;i++){fills[i].style.width='0';fills[i].classList.remove('animated');}
+showPage('pgWelcome');
 }
 
 function copyResult(){
-  const type=calcType(),p=P[type];if(!p)return;
-  const dc=[{k:'Z',l:'曜',r:'渊',p:'B'},{k:'E',l:'砚',r:'翼',p:'F'},{k:'T',l:'铮',r:'泉',p:'I'},{k:'I',l:'岳',r:'溪',p:'A'}];
-  const dims=dc.map(d=>{const s=sc[d.k],isP=s>=3,pct=Math.max(s/5*100,(5-s)/5*100);return`${d.l}/${d.r}: ${isP?d.l:d.r} ${Math.round(pct)}%`}).join(' | ');
-  const txt=`【ZETI人格测试】\n类型: ${type} - ${p.name} (${p.en})\n${p.motto}\n\n维度: ${dims}\n\n${p.desc}`;
-  navigator.clipboard.writeText(txt).then(()=>toast('结果已复制到剪贴板')).catch(()=>toast('复制失败，请手动选择文本'));
+var type=calcType();
+var p=PData[type];if(!p)return;
+var dc=[{k:'Z',l:'曜',r:'渊'},{k:'E',l:'砚',r:'翼'},{k:'T',l:'铮',r:'泉'},{k:'I',l:'岳',r:'溪'}];
+var dims='';
+for(var i=0;i<dc.length;i++){
+var d=dc[i];var s=sc[d.k];var isP=s>=3;var pct=Math.max(s/5*100,(5-s)/5*100);
+dims+=d.l+'/'+d.r+': '+(isP?d.l:d.r)+' '+Math.round(pct)+'%';
+if(i<dc.length-1)dims+=' | ';
+}
+var txt='【ZETI人格测试】\n类型: '+type+' - '+p.name+' ('+p.en+')\n'+p.motto+'\n\n维度: '+dims+'\n\n'+p.desc;
+navigator.clipboard.writeText(txt).then(function(){toast('结果已复制到剪贴板')}).catch(function(){toast('复制失败，请手动选择文本')});
 }
 
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800)}
+function toast(msg){
+var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+setTimeout(function(){el.classList.remove('show')},2800);
+}
 
-document.addEventListener('touchstart',()=>{},{passive:true});
+document.addEventListener('touchstart',function(){},{passive:true});
 </script>
 </body>
 </html>

@@ -18,13 +18,15 @@
   --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
   --r:16px;--rs:10px;--rx:8px;
 }
-html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+html{-webkit-tap-highlight-color:transparent}
 body{
   font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--fg);
-  min-height:100vh;min-height:100dvh;overflow-x:hidden;line-height:1.75;
+  height:100vh;height:100dvh;overflow:hidden;line-height:1.75;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
 h1,h2,h3,h4{font-family:'Noto Serif SC',serif;line-height:1.3}
+
+/* 星空 */
 canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;will-change:transform}
 .orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;will-change:transform;filter:blur(90px)}
 .orb-1{width:clamp(280px,50vw,500px);height:clamp(280px,50vw,500px);background:rgba(212,162,76,.07);top:-10%;right:-8%;animation:oF1 20s ease-in-out infinite}
@@ -34,21 +36,36 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 @keyframes oF2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}}
 @keyframes oF3{0%,100%{transform:translate(-50%,0) scale(1)}50%{transform:translate(-50%,30px) scale(1.06)}}
 
-/* 页面容器 */
+/* ========== 页面核心：fixed定位，独立滚动 ========== */
 .page{
-  position:relative;z-index:1;min-height:100vh;min-height:100dvh;
-  display:flex;align-items:center;justify-content:center;
-  padding:clamp(1rem,4vw,2rem);padding-top:max(clamp(1rem,4vw,2rem),var(--safe-t));
-  padding-bottom:max(clamp(1rem,4vw,2rem),var(--safe-b));
+  position:fixed;top:0;right:0;bottom:0;left:0;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  display:flex;justify-content:center;align-items:flex-start;
+  z-index:1;
+  padding:clamp(1rem,4vw,2rem);
+  padding-top:max(clamp(1rem,4vw,2rem),var(--safe-t));
+  padding-bottom:max(clamp(2rem,5vw,3rem),var(--safe-b));
   opacity:0;visibility:hidden;transform:translateY(24px) scale(.98);
   transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1),visibility 0s .65s;
   pointer-events:none;
 }
-.page.active{opacity:1;visibility:visible;transform:translateY(0) scale(1);transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1),visibility 0s 0s;pointer-events:all}
-.page.exit{opacity:0;visibility:hidden;transform:translateY(-20px) scale(.98);transition:opacity .45s cubic-bezier(.4,0,.2,1),transform .45s cubic-bezier(.4,0,.2,1),visibility 0s .45s;pointer-events:none}
-.wrap{max-width:680px;width:100%;margin:0 auto}
+.page.active{
+  opacity:1;visibility:visible;transform:translateY(0) scale(1);z-index:2;
+  transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1),visibility 0s 0s;
+  pointer-events:all;
+}
+.page.exit{
+  opacity:0;visibility:hidden;transform:translateY(-20px) scale(.98);z-index:1;
+  transition:opacity .45s cubic-bezier(.4,0,.2,1),transform .45s cubic-bezier(.4,0,.2,1),visibility 0s .45s;
+  pointer-events:none;
+}
 
-/* ========== 通用组件 ========== */
+/* 安全垂直居中：内容短则居中，内容长则从顶部开始 */
+.vc{margin-top:auto;margin-bottom:auto}
+.wrap{max-width:680px;width:100%}
+
+/* ========== 通用按钮 ========== */
 .btn-p{
   display:inline-flex;align-items:center;gap:.6rem;
   padding:.85rem 2.4rem;background:linear-gradient(145deg,var(--accent-l),var(--accent),#b87830);
@@ -62,17 +79,14 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(212,162,76,.3)}
 .btn-p:hover::after{opacity:1}
 .btn-p:active{transform:translateY(0) scale(.97)}
-
 .btn-s{
   display:inline-flex;align-items:center;gap:.5rem;
   padding:.7rem 1.8rem;background:transparent;color:var(--accent);
   border:1px solid var(--border);border-radius:999px;font-size:clamp(.82rem,1.8vw,.9rem);
-  cursor:pointer;transition:all .35s;font-family:'Noto Sans SC',sans-serif;
-  backdrop-filter:blur(8px);
+  cursor:pointer;transition:all .35s;font-family:'Noto Sans SC',sans-serif;backdrop-filter:blur(8px);
 }
 .btn-s:hover{background:var(--accent-d);border-color:var(--accent);transform:translateY(-1px)}
 .btn-s:active{transform:scale(.97)}
-
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 
 /* ========== 欢迎页 ========== */
@@ -80,8 +94,7 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
   display:inline-flex;align-items:center;gap:.5rem;
   padding:.4rem 1.4rem;border:1px solid var(--border);border-radius:999px;
   font-size:.72rem;letter-spacing:.35em;color:var(--accent);
-  background:var(--accent-d);backdrop-filter:blur(16px);
-  animation:fadeUp .8s .2s both;
+  background:var(--accent-d);backdrop-filter:blur(16px);animation:fadeUp .8s .2s both;
 }
 .w-title{
   font-size:clamp(4rem,14vw,8rem);font-weight:900;letter-spacing:.06em;
@@ -103,9 +116,8 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 }
 .dim-card{
   padding:clamp(.8rem,2vw,1.2rem) .6rem;border-radius:var(--r);
-  background:var(--card);border:1px solid var(--border-s);
-  backdrop-filter:blur(12px);transition:transform .4s cubic-bezier(.4,0,.2,1),border-color .4s,box-shadow .4s;
-  cursor:pointer;
+  background:var(--card);border:1px solid var(--border-s);backdrop-filter:blur(12px);
+  transition:transform .4s cubic-bezier(.4,0,.2,1),border-color .4s,box-shadow .4s;cursor:pointer;
 }
 .dim-card:hover{transform:translateY(-4px);border-color:var(--border);box-shadow:0 8px 32px rgba(212,162,76,.08)}
 .dim-icon{font-size:clamp(1.1rem,2.5vw,1.4rem);margin-bottom:.4rem}
@@ -114,126 +126,73 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .w-btn{animation:fadeUp .8s .85s both}
 
 /* ========== 维度介绍页 ========== */
-.intro-wrap{
-  max-width:720px;width:100%;margin:0 auto;
-  padding:clamp(1.5rem,5vw,3rem) 0;
-}
+.intro-wrap{max-width:720px;width:100%;padding:clamp(1rem,3vw,2rem) 0}
 .intro-head{text-align:center;margin-bottom:clamp(2rem,6vw,3.5rem)}
 .intro-badge{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.35rem 1.2rem;border:1px solid var(--border);border-radius:999px;
-  font-size:.7rem;letter-spacing:.3em;color:var(--accent);
-  background:var(--accent-d);backdrop-filter:blur(16px);margin-bottom:1.5rem;
+  display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1.2rem;
+  border:1px solid var(--border);border-radius:999px;font-size:.7rem;
+  letter-spacing:.3em;color:var(--accent);background:var(--accent-d);
+  backdrop-filter:blur(16px);margin-bottom:1.5rem;
 }
 .intro-title{
   font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;
   background:linear-gradient(145deg,var(--accent-l),var(--accent));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin-bottom:.5rem;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem;
 }
 .intro-subtitle{font-size:clamp(.9rem,2.2vw,1.1rem);color:var(--fg2);font-weight:300;letter-spacing:.1em}
 
-/* 维度大卡片 */
 .dim-section{
-  margin-bottom:clamp(2rem,5vw,3rem);
-  opacity:0;transform:translateY(30px);
+  margin-bottom:clamp(2rem,5vw,3rem);opacity:0;transform:translateY(30px);
   transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1);
 }
 .dim-section.vis{opacity:1;transform:translateY(0)}
-
-.dim-section-inner{
-  border-radius:20px;overflow:hidden;
-  background:var(--card);border:1px solid var(--border-s);
-  backdrop-filter:blur(12px);
-}
+.dim-section-inner{border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--border-s);backdrop-filter:blur(12px)}
 .dim-header{
   padding:clamp(1.2rem,3vw,1.8rem) clamp(1.2rem,3vw,2rem);
-  display:flex;align-items:center;gap:clamp(.8rem,2vw,1.2rem);
-  border-bottom:1px solid var(--border-s);
+  display:flex;align-items:center;gap:clamp(.8rem,2vw,1.2rem);border-bottom:1px solid var(--border-s);
 }
 .dim-header-icon{
-  width:clamp(48px,10vw,64px);height:clamp(48px,10vw,64px);
-  border-radius:16px;display:flex;align-items:center;justify-content:center;
-  font-size:clamp(1.3rem,3vw,1.8rem);flex-shrink:0;
-  transition:transform .4s;
+  width:clamp(48px,10vw,64px);height:clamp(48px,10vw,64px);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;font-size:clamp(1.3rem,3vw,1.8rem);
+  flex-shrink:0;transition:transform .4s;
 }
 .dim-section:hover .dim-header-icon{transform:scale(1.08) rotate(-3deg)}
-.dim-header-text h3{
-  font-size:clamp(1.2rem,3vw,1.5rem);font-weight:700;margin-bottom:.15rem;
-}
-.dim-header-text .dim-q{
-  font-size:clamp(.82rem,1.8vw,.92rem);color:var(--fg2);font-weight:300;letter-spacing:.06em;
-}
-
+.dim-header-text h3{font-size:clamp(1.2rem,3vw,1.5rem);font-weight:700;margin-bottom:.15rem}
+.dim-header-text .dim-q{font-size:clamp(.82rem,1.8vw,.92rem);color:var(--fg2);font-weight:300;letter-spacing:.06em}
 .dim-body{padding:clamp(1.2rem,3vw,2rem) clamp(1.2rem,3vw,2rem)}
 .dim-body-intro{
   font-size:clamp(.85rem,2vw,.93rem);color:var(--fg2);line-height:1.85;
-  margin-bottom:clamp(1.2rem,3vw,1.8rem);padding-bottom:clamp(1rem,2.5vw,1.5rem);
-  border-bottom:1px dashed var(--border-s);
+  margin-bottom:clamp(1.2rem,3vw,1.8rem);padding-bottom:clamp(1rem,2.5vw,1.5rem);border-bottom:1px dashed var(--border-s);
 }
-
-/* 两极对比 */
 .poles{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch}
-.pole{
-  padding:clamp(1rem,2.5vw,1.5rem);
-  border-radius:var(--r);transition:background .4s;
-}
+.pole{padding:clamp(1rem,2.5vw,1.5rem);border-radius:var(--r);transition:background .4s}
 .pole:hover{background:rgba(255,255,255,.02)}
 .pole-label{
-  display:inline-flex;align-items:center;gap:.5rem;
-  font-family:'Noto Serif SC',serif;font-size:clamp(1.3rem,3.5vw,1.8rem);
-  font-weight:900;margin-bottom:.3rem;
+  display:inline-flex;align-items:center;gap:.5rem;font-family:'Noto Serif SC',serif;
+  font-size:clamp(1.3rem,3.5vw,1.8rem);font-weight:900;margin-bottom:.3rem;
 }
 .pole-tag{
   font-family:'Noto Sans SC',sans-serif;font-size:.65rem;font-weight:500;
-  padding:.15rem .55rem;border-radius:999px;letter-spacing:.06em;
-  vertical-align:middle;
+  padding:.15rem .55rem;border-radius:999px;letter-spacing:.06em;vertical-align:middle;
 }
-.pole-keyword{
-  font-size:clamp(.78rem,1.6vw,.85rem);color:var(--fg2);margin-bottom:clamp(.8rem,2vw,1.2rem);
-  font-weight:300;letter-spacing:.08em;
-}
-.pole-desc{
-  font-size:clamp(.82rem,1.8vw,.9rem);color:var(--fg2);line-height:1.9;
-}
-.pole-desc li{
-  list-style:none;padding-left:1.2em;position:relative;margin-bottom:.35em;
-}
-.pole-desc li::before{
-  content:'';position:absolute;left:0;top:.65em;
-  width:6px;height:6px;border-radius:50%;
-}
-
-/* 中间分隔线 */
-.pole-divider{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:0 clamp(.5rem,1.5vw,.8rem);position:relative;
-}
+.pole-keyword{font-size:clamp(.78rem,1.6vw,.85rem);color:var(--fg2);margin-bottom:clamp(.8rem,2vw,1.2rem);font-weight:300;letter-spacing:.08em}
+.pole-desc{font-size:clamp(.82rem,1.8vw,.9rem);color:var(--fg2);line-height:1.9}
+.pole-desc li{list-style:none;padding-left:1.2em;position:relative;margin-bottom:.35em}
+.pole-desc li::before{content:'';position:absolute;left:0;top:.65em;width:6px;height:6px;border-radius:50%;background:var(--c)}
+.pole-divider{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 clamp(.5rem,1.5vw,.8rem);position:relative}
 .pole-divider::before{
   content:'';position:absolute;top:10%;bottom:10%;width:1px;
   background:linear-gradient(180deg,transparent,var(--border-s),var(--border),var(--border-s),transparent);
 }
 .pole-vs{
-  font-family:'Noto Serif SC',serif;font-size:.7rem;font-weight:700;
-  color:var(--muted);letter-spacing:.15em;
-  background:var(--bg2);padding:.4em .6em;border-radius:999px;
+  font-family:'Noto Serif SC',serif;font-size:.7rem;font-weight:700;color:var(--muted);
+  letter-spacing:.15em;background:var(--bg2);padding:.4em .6em;border-radius:999px;
   border:1px solid var(--border-s);position:relative;z-index:1;
 }
-
-/* 维度底部渐变光谱 */
-.dim-spectrum{
-  height:4px;margin:0 clamp(1.2rem,3vw,2rem) clamp(1.2rem,3vw,1.5rem);
-  border-radius:999px;position:relative;overflow:hidden;
-}
-.dim-spectrum-fill{
-  height:100%;border-radius:999px;
-}
-
-/* 底部CTA */
+.dim-spectrum{height:4px;margin:0 clamp(1.2rem,3vw,2rem) clamp(1.2rem,3vw,1.5rem);border-radius:999px;overflow:hidden}
+.dim-spectrum-fill{height:100%;border-radius:999px}
 .intro-cta{
-  text-align:center;margin-top:clamp(1.5rem,4vw,2.5rem);
-  padding-top:clamp(1.5rem,4vw,2rem);
-  border-top:1px solid var(--border-s);
+  text-align:center;margin-top:clamp(1.5rem,4vw,2.5rem);padding-top:clamp(1.5rem,4vw,2rem);border-top:1px solid var(--border-s);
 }
 .intro-cta p{color:var(--fg2);font-size:clamp(.85rem,2vw,.93rem);margin-bottom:1.2rem;line-height:1.8}
 
@@ -241,8 +200,7 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .progress-wrap{display:flex;align-items:center;gap:.8rem;margin-bottom:2rem;padding:0 .2rem}
 .progress-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;position:relative}
 .progress-fill{
-  height:100%;border-radius:999px;width:0;
-  background:linear-gradient(90deg,var(--accent-l),var(--accent));
+  height:100%;border-radius:999px;width:0;background:linear-gradient(90deg,var(--accent-l),var(--accent));
   transition:width .6s cubic-bezier(.4,0,.2,1);position:relative;
 }
 .progress-fill::after{
@@ -251,21 +209,15 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
   box-shadow:0 0 12px var(--accent),0 0 24px rgba(212,162,76,.3);
 }
 .progress-num{font-size:.78rem;color:var(--fg2);white-space:nowrap;min-width:50px;text-align:right;font-variant-numeric:tabular-nums}
-.q-area{position:relative;min-height:320px}
+.q-area{position:relative;min-height:280px}
 .q-num{font-size:.72rem;color:var(--accent);letter-spacing:.25em;margin-bottom:.8rem;font-weight:500}
-.q-text{
-  font-family:'Noto Serif SC',serif;font-size:clamp(1.15rem,3.5vw,1.5rem);
-  font-weight:600;line-height:1.65;margin-bottom:2rem;
-}
+.q-text{font-family:'Noto Serif SC',serif;font-size:clamp(1.15rem,3.5vw,1.5rem);font-weight:600;line-height:1.65;margin-bottom:2rem}
 .q-opts{display:flex;flex-direction:column;gap:clamp(.6rem,1.5vw,.9rem)}
 .opt{
-  padding:clamp(.9rem,2.5vw,1.2rem) clamp(1rem,3vw,1.4rem);
-  border-radius:var(--r);background:var(--card);
-  border:1px solid var(--border-s);cursor:pointer;
-  transition:all .4s cubic-bezier(.4,0,.2,1);
-  text-align:left;font-size:clamp(.85rem,2.2vw,.95rem);
-  line-height:1.65;color:var(--fg);position:relative;overflow:hidden;
-  backdrop-filter:blur(12px);display:flex;align-items:flex-start;gap:.8rem;
+  padding:clamp(.9rem,2.5vw,1.2rem) clamp(1rem,3vw,1.4rem);border-radius:var(--r);background:var(--card);
+  border:1px solid var(--border-s);cursor:pointer;transition:all .4s cubic-bezier(.4,0,.2,1);
+  text-align:left;font-size:clamp(.85rem,2.2vw,.95rem);line-height:1.65;color:var(--fg);
+  position:relative;overflow:hidden;backdrop-filter:blur(12px);display:flex;align-items:flex-start;gap:.8rem;
   -webkit-user-select:none;user-select:none;
 }
 .opt::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-d),transparent 70%);opacity:0;transition:opacity .4s}
@@ -273,10 +225,9 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .opt:hover::before{opacity:1}
 .opt:active{transform:scale(.975) translateX(clamp(4px,1vw,8px));transition-duration:.15s}
 .opt-lbl{
-  flex-shrink:0;width:28px;height:28px;line-height:28px;
-  border-radius:var(--rx);background:rgba(255,255,255,.05);
-  text-align:center;font-size:.72rem;font-weight:700;color:var(--accent);
-  position:relative;z-index:1;transition:background .3s,color .3s;
+  flex-shrink:0;width:28px;height:28px;line-height:28px;border-radius:var(--rx);
+  background:rgba(255,255,255,.05);text-align:center;font-size:.72rem;font-weight:700;
+  color:var(--accent);position:relative;z-index:1;transition:background .3s,color .3s;
 }
 .opt:hover .opt-lbl{background:var(--accent);color:#0a0a0f}
 .opt-txt{position:relative;z-index:1;padding-top:2px}
@@ -291,11 +242,10 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .r-header{padding-top:1rem;margin-bottom:1.5rem;text-align:center}
 .r-code{font-size:.78rem;letter-spacing:.5em;color:var(--accent);margin-bottom:.6rem;font-weight:500}
 .r-icon-wrap{
-  width:clamp(80px,20vw,110px);height:clamp(80px,20vw,110px);
-  margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;background:radial-gradient(circle,var(--accent-d) 0%,transparent 70%);
-  border:1px solid var(--border);color:var(--accent);font-size:clamp(2rem,5vw,2.8rem);
-  position:relative;animation:iPulse 3s ease-in-out infinite;
+  width:clamp(80px,20vw,110px);height:clamp(80px,20vw,110px);margin:0 auto 1.2rem;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:radial-gradient(circle,var(--accent-d) 0%,transparent 70%);border:1px solid var(--border);
+  color:var(--accent);font-size:clamp(2rem,5vw,2.8rem);position:relative;animation:iPulse 3s ease-in-out infinite;
 }
 .r-icon-wrap::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(212,162,76,.08);animation:iRing 3s ease-in-out infinite}
 @keyframes iPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,162,76,.15)}50%{box-shadow:0 0 40px 8px rgba(212,162,76,.1)}}
@@ -310,18 +260,15 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .dim-bars{display:grid;gap:1.1rem;margin:2rem 0;text-align:left;max-width:520px;margin-left:auto;margin-right:auto}
 .dim-item{display:flex;flex-direction:column;gap:.35rem}
 .dim-head{display:flex;justify-content:space-between;align-items:center;font-size:clamp(.78rem,1.8vw,.85rem)}
-.dim-head .ds{color:var(--fg2)}
-.dim-head .dr{color:var(--accent);font-weight:700}
+.dim-head .ds{color:var(--fg2)}.dim-head .dr{color:var(--accent);font-weight:700}
 .dim-track{height:7px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden}
 .dim-fill{height:100%;border-radius:999px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1);position:relative}
 .dim-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:inherit;box-shadow:0 0 8px currentColor;opacity:0;transition:opacity .3s .8s}
 .dim-fill.animated::after{opacity:1}
 .r-section{
-  margin:1.8rem 0;padding:clamp(1.2rem,3vw,1.8rem);
-  border-radius:var(--r);background:var(--card);
-  border:1px solid var(--border-s);text-align:left;
-  backdrop-filter:blur(12px);opacity:0;transform:translateY(16px);
-  transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1);
+  margin:1.8rem 0;padding:clamp(1.2rem,3vw,1.8rem);border-radius:var(--r);background:var(--card);
+  border:1px solid var(--border-s);text-align:left;backdrop-filter:blur(12px);
+  opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1);
 }
 .r-section.vis{opacity:1;transform:translateY(0)}
 .r-section h3{font-size:clamp(1rem,2.5vw,1.12rem);color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.55rem}
@@ -330,8 +277,7 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .tags{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.3rem}
 .tag{
   padding:.3rem .85rem;border-radius:999px;font-size:clamp(.72rem,1.6vw,.8rem);
-  border:1px solid var(--border);color:var(--fg2);background:var(--accent-d);
-  transition:transform .3s,box-shadow .3s;
+  border:1px solid var(--border);color:var(--fg2);background:var(--accent-d);transition:transform .3s,box-shadow .3s;
 }
 .tag:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(212,162,76,.1)}
 .tag.good{border-color:rgba(64,208,168,.25);color:#40d0a8;background:rgba(64,208,168,.06)}
@@ -339,12 +285,9 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 .r-actions{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:2.2rem;padding-bottom:var(--safe-b)}
 .toast{
   position:fixed;bottom:calc(1.5rem + var(--safe-b));left:50%;
-  transform:translateX(-50%) translateY(80px);
-  padding:.7rem 1.6rem;border-radius:var(--rs);
-  background:var(--card);border:1px solid var(--border);
-  color:var(--fg);font-size:.88rem;z-index:100;
-  transition:transform .45s cubic-bezier(.4,0,.2,1);
-  backdrop-filter:blur(20px);white-space:nowrap;
+  transform:translateX(-50%) translateY(80px);padding:.7rem 1.6rem;border-radius:var(--rs);
+  background:var(--card);border:1px solid var(--border);color:var(--fg);font-size:.88rem;z-index:100;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px);white-space:nowrap;
   box-shadow:0 8px 32px rgba(0,0,0,.4);
 }
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -384,13 +327,11 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
 
 <!-- ===== 欢迎页 ===== -->
 <section id="pgWelcome" class="page active" role="main" aria-label="欢迎">
-  <div class="wrap" style="text-align:center">
+  <div class="wrap vc" style="text-align:center">
     <div class="w-badge"><i class="fas fa-infinity" style="font-size:.65rem"></i> Personality Universe</div>
     <h1 class="w-title">ZETI</h1>
     <p class="w-sub">探索你的人格宇宙</p>
-    <p class="w-desc">
-      ZETI 从四个核心维度解析你的思维模式与行为倾向，揭示你独一无二的灵魂图谱。20 道精选题目，约 3 分钟，开启一场向内探索的旅程。
-    </p>
+    <p class="w-desc">ZETI 从四个核心维度解析你的思维模式与行为倾向，揭示你独一无二的灵魂图谱。20 道精选题目，约 3 分钟，开启一场向内探索的旅程。</p>
     <div class="dims">
       <div class="dim-card" onclick="goIntro()">
         <div class="dim-icon" style="color:var(--z)"><i class="fas fa-sun"></i></div>
@@ -414,15 +355,13 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
       </div>
     </div>
     <div class="w-btn">
-      <button class="btn-p" onclick="goIntro()" aria-label="了解维度体系">
-        <i class="fas fa-compass"></i> 启程探索
-      </button>
+      <button class="btn-p" onclick="goIntro()" aria-label="了解维度体系"><i class="fas fa-compass"></i> 启程探索</button>
     </div>
   </div>
 </section>
 
 <!-- ===== 维度介绍页 ===== -->
-<section id="pgIntro" class="page" role="main" aria-label="维度介绍" style="align-items:flex-start">
+<section id="pgIntro" class="page" role="main" aria-label="维度介绍">
   <div class="intro-wrap">
     <div class="intro-head">
       <div class="intro-badge"><i class="fas fa-layer-group" style="font-size:.6rem"></i> Dimensions</div>
@@ -434,18 +373,11 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
     <div class="dim-section" data-dim="Z">
       <div class="dim-section-inner">
         <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--z-d);color:var(--z);border:1px solid rgba(240,160,48,.2)">
-            <i class="fas fa-sun"></i>
-          </div>
-          <div class="dim-header-text">
-            <h3 style="color:var(--z)">Z · 曜 / 渊</h3>
-            <div class="dim-q">你从何处获得能量？</div>
-          </div>
+          <div class="dim-header-icon" style="background:var(--z-d);color:var(--z);border:1px solid rgba(240,160,48,.2)"><i class="fas fa-sun"></i></div>
+          <div class="dim-header-text"><h3 style="color:var(--z)">Z · 曜 / 渊</h3><div class="dim-q">你从何处获得能量？</div></div>
         </div>
         <div class="dim-body">
-          <p class="dim-body-intro">
-            曜与渊描述的是你的能量流向——你是在人群中焕发活力，还是在独处时恢复元气？这并非简单的"外向"与"内向"之分，而是关于你灵魂的充电方式。
-          </p>
+          <p class="dim-body-intro">曜与渊描述的是你的能量流向——你是在人群中焕发活力，还是在独处时恢复元气？这并非简单的"外向"与"内向"之分，而是关于你灵魂的充电方式。</p>
           <div class="poles">
             <div class="pole">
               <div class="pole-label" style="color:var(--z)">曜<span class="pole-tag" style="background:var(--z-d);color:var(--z);border:1px solid rgba(240,160,48,.2)">外烁</span></div>
@@ -480,18 +412,11 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
     <div class="dim-section" data-dim="E">
       <div class="dim-section-inner">
         <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--e-d);color:var(--e);border:1px solid rgba(64,208,168,.2)">
-            <i class="fas fa-eye"></i>
-          </div>
-          <div class="dim-header-text">
-            <h3 style="color:var(--e)">E · 砚 / 翼</h3>
-            <div class="dim-q">你如何感知这个世界？</div>
-          </div>
+          <div class="dim-header-icon" style="background:var(--e-d);color:var(--e);border:1px solid rgba(64,208,168,.2)"><i class="fas fa-eye"></i></div>
+          <div class="dim-header-text"><h3 style="color:var(--e)">E · 砚 / 翼</h3><div class="dim-q">你如何感知这个世界？</div></div>
         </div>
         <div class="dim-body">
-          <p class="dim-body-intro">
-            砚与翼描述的是你收集信息的方式——你信赖五感所及的具体实在，还是追随第六感所向的抽象可能？一方砚台研磨现实，一双翅膀飞向想象。
-          </p>
+          <p class="dim-body-intro">砚与翼描述的是你收集信息的方式——你信赖五感所及的具体实在，还是追随第六感所向的抽象可能？一方砚台研磨现实，一双翅膀飞向想象。</p>
           <div class="poles">
             <div class="pole">
               <div class="pole-label" style="color:var(--e)">砚<span class="pole-tag" style="background:var(--e-d);color:var(--e);border:1px solid rgba(64,208,168,.2)">具象</span></div>
@@ -526,18 +451,11 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
     <div class="dim-section" data-dim="T">
       <div class="dim-section-inner">
         <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--t-d);color:var(--t);border:1px solid rgba(224,96,128,.2)">
-            <i class="fas fa-scale-balanced"></i>
-          </div>
-          <div class="dim-header-text">
-            <h3 style="color:var(--t)">T · 铮 / 泉</h3>
-            <div class="dim-q">你如何做出决断？</div>
-          </div>
+          <div class="dim-header-icon" style="background:var(--t-d);color:var(--t);border:1px solid rgba(224,96,128,.2)"><i class="fas fa-scale-balanced"></i></div>
+          <div class="dim-header-text"><h3 style="color:var(--t)">T · 铮 / 泉</h3><div class="dim-q">你如何做出决断？</div></div>
         </div>
         <div class="dim-body">
-          <p class="dim-body-intro">
-            铮与泉描述的是你评判与抉择的依据——你以逻辑为尺丈量对错，还是以共情为秤衡量轻重？铮铮铁骨不偏不倚，清泉流淌绕石而行。
-          </p>
+          <p class="dim-body-intro">铮与泉描述的是你评判与抉择的依据——你以逻辑为尺丈量对错，还是以共情为秤衡量轻重？铮铮铁骨不偏不倚，清泉流淌绕石而行。</p>
           <div class="poles">
             <div class="pole">
               <div class="pole-label" style="color:var(--t)">铮<span class="pole-tag" style="background:var(--t-d);color:var(--t);border:1px solid rgba(224,96,128,.2)">理性</span></div>
@@ -572,18 +490,11 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
     <div class="dim-section" data-dim="I">
       <div class="dim-section-inner">
         <div class="dim-header">
-          <div class="dim-header-icon" style="background:var(--i-d);color:var(--i);border:1px solid rgba(224,144,96,.2)">
-            <i class="fas fa-mountain"></i>
-          </div>
-          <div class="dim-header-text">
-            <h3 style="color:var(--i)">I · 岳 / 溪</h3>
-            <div class="dim-q">你如何规划与行动？</div>
-          </div>
+          <div class="dim-header-icon" style="background:var(--i-d);color:var(--i);border:1px solid rgba(224,144,96,.2)"><i class="fas fa-mountain"></i></div>
+          <div class="dim-header-text"><h3 style="color:var(--i)">I · 岳 / 溪</h3><div class="dim-q">你如何规划与行动？</div></div>
         </div>
         <div class="dim-body">
-          <p class="dim-body-intro">
-            岳与溪描述的是你面对世界的步调——你如山岳般沉稳有序，还是如溪流般灵活随势？山岳不移定义方向，溪水不争终达大海。
-          </p>
+          <p class="dim-body-intro">岳与溪描述的是你面对世界的步调——你如山岳般沉稳有序，还是如溪流般灵活随势？山岳不移定义方向，溪水不争终达大海。</p>
           <div class="poles">
             <div class="pole">
               <div class="pole-label" style="color:var(--i)">岳<span class="pole-tag" style="background:var(--i-d);color:var(--i);border:1px solid rgba(224,144,96,.2)">定序</span></div>
@@ -614,19 +525,16 @@ canvas#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-event
       </div>
     </div>
 
-    <!-- CTA -->
     <div class="intro-cta">
       <p>四个维度，十六种组合，每一种都是独一无二的人格光谱。<br>现在，让我们找到属于你的那束光。</p>
-      <button class="btn-p" onclick="startTest()" aria-label="开始测试">
-        <i class="fas fa-play"></i> 开始测试
-      </button>
+      <button class="btn-p" onclick="startTest()" aria-label="开始测试"><i class="fas fa-play"></i> 开始测试</button>
     </div>
   </div>
 </section>
 
 <!-- ===== 测试页 ===== -->
 <section id="pgTest" class="page" role="main" aria-label="人格测试">
-  <div class="wrap">
+  <div class="wrap vc">
     <div class="progress-wrap">
       <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
       <div class="progress-num" id="pNum">1/20</div>
@@ -713,7 +621,6 @@ GPWA:{name:'月华',en:'Moonlight',icon:'fa-moon',motto:'"温柔而不失方向�
 GPWD:{name:'云梦',en:'Dreamweaver',icon:'fa-cloud-moon',motto:'"在梦境与现实间编织意义，于自由中寻找万物相连的隐秘脉络"',desc:'你活在两个世界的交汇处——现实的土壤与想象的天空。你从独处中汲取灵感，用共情理解他人的痛苦与渴望，然后用独特的方式将这一切编织成有意义的作品或行动。你是这个世界最需要的那种梦行者：既有勇气深入潜意识的海底，又有温柔将所见带回来分享给他人。',s:['想象力丰富','深度共情','艺术表达','灵活多变','灵性直觉'],w:['逃避现实','情绪敏感','缺乏条理','难以落地'],c:['诗人','电影导演','游戏叙事','心理治愈','跨领域艺术家'],g:'梦是你的翅膀，也是你的迷宫。试着给最深的那个梦一个具体的形状——一首诗、一幅画、一段代码、一次对话。当梦被编织成现实，你才真正成为造梦者，而非梦中人。'}
 };
 
-// ---- 状态 ----
 let cur=0,ans={},sc={Z:0,E:0,T:0,I:0};
 
 // ---- 星空 ----
@@ -724,7 +631,7 @@ let cur=0,ans={},sc={Z:0,E:0,T:0,I:0};
     const dpr=Math.min(window.devicePixelRatio||1,2);
     w=window.innerWidth;h=window.innerHeight;
     c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';
-    ctx.scale(dpr,dpr);stars=[];
+    ctx.setTransform(dpr,0,0,dpr,0,0);stars=[];
     const n=Math.min(Math.floor(w*h/3500),350);
     for(let i=0;i<n;i++)stars.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.1+.3,a:Math.random()*.55+.2,sp:Math.random()*.4+.06,ph:Math.random()*Math.PI*2});
   }
@@ -744,16 +651,17 @@ let cur=0,ans={},sc={Z:0,E:0,T:0,I:0};
   draw();
 })();
 
-// ---- 页面切换 ----
+// ---- 页面切换（核心修复） ----
 function showPage(id){
   const pages=document.querySelectorAll('.page');
+  // 当前活跃页退出
   pages.forEach(p=>{p.classList.remove('active');p.classList.add('exit')});
   setTimeout(()=>{
     pages.forEach(p=>p.classList.remove('exit'));
     const el=document.getElementById(id);
+    // 重置该页面内部滚动位置到顶部
+    el.scrollTop=0;
     el.classList.add('active');
-    window.scrollTo({top:0,behavior:'instant'});
-    // 如果是介绍页，触发滚动观察
     if(id==='pgIntro') observeDimSections();
   },380);
 }
@@ -761,32 +669,25 @@ function showPage(id){
 // ---- 维度介绍页滚动观察 ----
 let introObserver=null;
 function observeDimSections(){
-  // 断开旧观察
-  if(introObserver) introObserver.disconnect();
+  if(introObserver)introObserver.disconnect();
   const secs=document.querySelectorAll('.dim-section');
-  // 重置
   secs.forEach(s=>s.classList.remove('vis'));
+  // 以介绍页元素为滚动根
+  const root=document.getElementById('pgIntro');
   introObserver=new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('vis');
-      }
-    });
-  },{threshold:0.15,rootMargin:'0px 0px -40px 0px'});
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')});
+  },{threshold:0.12,root:root,rootMargin:'0px 0px -30px 0px'});
   secs.forEach(s=>introObserver.observe(s));
 }
 
-// ---- 前往介绍页 ----
 function goIntro(){showPage('pgIntro')}
 
-// ---- 开始测试 ----
 function startTest(){
   cur=0;ans={};sc={Z:0,E:0,T:0,I:0};
   showPage('pgTest');
   setTimeout(renderQ,450);
 }
 
-// ---- 渲染题目 ----
 function renderQ(){
   const q=Q[cur],area=document.getElementById('qArea');
   area.classList.remove('q-enter');area.classList.add('q-exit');
@@ -814,19 +715,14 @@ function addRipple(el,e){
   r.style.cssText=`width:${size}px;height:${size}px;left:${x-size/2}px;top:${y-size/2}px`;
   el.appendChild(r);setTimeout(()=>r.remove(),600);
 }
-
-// ---- 选择答案 ----
 function selectAns(dim,val){
   ans[cur]={d:dim,v:val};
   const pm={Z:'B',E:'F',T:'I',I:'A'};
   if(val===pm[dim])sc[dim]++;
   if(cur<Q.length-1){cur++;renderQ()}else showResult();
 }
-
-// ---- 计算类型 ----
 function calcType(){return(sc.Z>=3?'B':'G')+(sc.E>=3?'F':'P')+(sc.T>=3?'I':'W')+(sc.I>=3?'A':'D')}
 
-// ---- 显示结果 ----
 function showResult(){
   const type=calcType(),p=P[type];if(!p)return;
   document.getElementById('rCode').textContent=type.split('').join(' · ');
@@ -858,14 +754,12 @@ function showResult(){
   },700);
 }
 
-// ---- 重新测试 ----
 function restart(){
   document.querySelectorAll('.r-section').forEach(s=>s.classList.remove('vis'));
   document.querySelectorAll('.dim-fill').forEach(b=>{b.style.width='0';b.classList.remove('animated')});
   showPage('pgWelcome');
 }
 
-// ---- 复制结果 ----
 function copyResult(){
   const type=calcType(),p=P[type];if(!p)return;
   const dc=[{k:'Z',l:'曜',r:'渊',p:'B'},{k:'E',l:'砚',r:'翼',p:'F'},{k:'T',l:'铮',r:'泉',p:'I'},{k:'I',l:'岳',r:'溪',p:'A'}];
@@ -874,16 +768,8 @@ function copyResult(){
   navigator.clipboard.writeText(txt).then(()=>toast('结果已复制到剪贴板')).catch(()=>toast('复制失败，请手动选择文本'));
 }
 
-// ---- Toast ----
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800)}
 
-// ---- 列表项圆点颜色 ----
-document.querySelectorAll('.pole-desc li').forEach(li=>{
-  const c=li.style.getPropertyValue('--c');
-  if(c) li.querySelector('::before') // CSS handles this via custom property
-});
-
-// ---- 触摸优化 ----
 document.addEventListener('touchstart',()=>{},{passive:true});
 </script>
 </body>
